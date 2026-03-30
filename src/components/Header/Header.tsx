@@ -24,7 +24,7 @@ export default function Header() {
   return (
     <>
       <header
-        className={`fixed w-full z-30 h-20 flex items-center transition-all duration-300 text-sm tracking-widest text-black
+        className={`sticky w-full top-0 z-30 h-20 flex items-center transition-all duration-300 text-sm tracking-widest text-black
         ${scrolled ? "bg-white shadow-md" : "bg-transparent"}`}
       >
         <div className="flex items-center justify-between w-full px-4 md:px-10 lg:px-36">

@@ -6,7 +6,7 @@ import { eloquia } from "@/lib/fonts";
 
 export default function HeroSection() {
   return (
-    <section className="relative h-screen bg-background pt-50 md:pt-40 overflow-hidden">
+    <section className="relative h-screen bg-background pt-50 md:pt-40 -mt-20 overflow-hidden">
       <div className="relative z-20 text-center max-w-3xl mx-auto px-6">
         <p className="text-md tracking-widest text-gray-500">
           SEMPE DOLLAR MURNI
@@ -22,7 +22,7 @@ export default function HeroSection() {
       </div>
 
       <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 
+        className="absolute bottom-0 left-1/2 -translate-x-1/2
         w-[250%] md:w-[140%] h-190 md:h-120 
         rounded-t-[50%] md:rounded-t-[100%] 
         overflow-hidden z-10"
@@ -33,7 +33,7 @@ export default function HeroSection() {
           fill
           priority
           sizes="100vw"
-          className="object-contain opacity-60 scale-110 md:scale-210"
+          className="object-contain opacity-60 scale-110 md:scale-220"
         />
 
         <div className="absolute inset-0 bg-white/30" />
