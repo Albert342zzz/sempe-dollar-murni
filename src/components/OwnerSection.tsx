@@ -1,47 +1,59 @@
 import Image from "next/image";
+import Link from "next/link";
+import Reveal from "@/components/Reveal";
+import { eloquia } from "@/lib/fonts";
 
 export default function OwnerSection() {
   return (
-    <section>
-      <div className="mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-        <div>
-          <Image
-            src="/images/owner.jpg"
-            alt="Owner"
-            width={500}
-            height={500}
-            className="w-full h-auto"
-          />
-        </div>
+    <section className="bg-cream-soft py-20">
+      <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-2">
+        {/* Teks */}
+        <Reveal>
+          <p className="text-sm tracking-widest text-brown">CERITA KAMI</p>
 
-        <div className="max-w-lg mx-auto md:mx-0 p-6">
-          <h2 className="text-2xl md:text-3xl font-semibold">Cerita Kami</h2>
+          <h2
+            className={`${eloquia.className} mt-3 text-3xl font-semibold leading-snug md:text-4xl`}
+          >
+            Tradisi yang Terus{" "}
+            <span className="italic text-terracotta">Hidup</span>
+          </h2>
 
-          <p className="mt-4 text-gray-600">
+          <p className="mt-4 leading-relaxed text-ink/70">
             Didirikan pada tahun 1986, Sempe Dollar Murni telah menjadi bagian
-            dari tradisi kuliner Indonesia selama lebih dari tiga dekade. Kami
-            memulai perjalanan kami dengan tekad untuk menghadirkan kue kering
-            berkualitas tinggi yang dapat dinikmati oleh semua orang. Dengan
-            menggunakan resep turun-temurun dan bahan-bahan terbaik, kami telah
-            berhasil menciptakan produk yang tidak hanya lezat tetapi juga
-            memiliki cita rasa autentik yang disukai oleh banyak orang.
+            dari tradisi kuliner selama lebih dari tiga dekade. Berawal dari
+            resep keluarga, kami bertekad menghadirkan camilan renyah berkualitas
+            yang bisa dinikmati semua orang.
+          </p>
+          <p className="mt-4 leading-relaxed text-ink/70">
+            Dengan resep turun-temurun dan bahan-bahan terbaik, kami bangga
+            menjadi bagian dari momen spesial pelanggan, dan terus berkomitmen
+            menjaga cita rasa autentik di setiap produk.
           </p>
 
-          <p className="mt-4 text-gray-600">
-            Kami bangga menjadi bagian dari momen-momen spesial dalam kehidupan
-            pelanggan kami, dan kami berkomitmen untuk terus memberikan produk
-            berkualitas tinggi yang dapat dinikmati oleh semua orang.
-          </p>
+          <Link
+            href="/about"
+            className="mt-6 inline-block rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:-translate-y-0.5 hover:bg-brown hover:shadow-md"
+          >
+            Selengkapnya
+          </Link>
+        </Reveal>
 
-          <div className="mt-6">
-            <a
-              href="#"
-              className="inline-block bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition"
-            >
-              Selengkapnya
-            </a>
+        {/* Gambar */}
+        <Reveal delay={100} className="relative">
+          <div className="group relative aspect-[4/3] overflow-hidden rounded-[2rem]">
+            <Image
+              src="/images/owner.jpg"
+              alt="Pendiri Sempe Dollar Murni"
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
           </div>
-        </div>
+          <div className="absolute -bottom-4 left-4 rounded-2xl border border-brown/10 bg-cream px-5 py-3 shadow-md">
+            <p className="text-xs text-brown">Berdiri sejak</p>
+            <p className="text-xl font-semibold text-ink">1986</p>
+          </div>
+        </Reveal>
       </div>
     </section>
   );

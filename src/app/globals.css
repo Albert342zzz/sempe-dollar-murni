@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4ebe1;
+  --foreground: #3d2c1e;
 }
 
 @theme inline {
@@ -10,13 +10,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #e6dcd2;
-    --foreground: #171717;
-  }
+  /* Brand palette — warm & appetizing (60 / 30 / 10) */
+  --color-cream: #f4ebe1; /* 60% — primary background */
+  --color-cream-soft: #fbf6ef; /* lighter cream for cards / alternating sections */
+  --color-brown: #8c5a3c; /* 30% — warm brown (secondary) */
+  --color-terracotta: #a64b2a; /* 30% — terracotta (CTA / active) */
+  --color-gold: #d4af37; /* 10% — muted gold (deep accent) */
+  --color-olive: #4a5d4e; /* 10% — dark olive (deep accent alt) */
+  --color-ink: #3d2c1e; /* deep warm brown for text */
 }
 
 body {
