@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { BiShoppingBag, BiLogIn } from "react-icons/bi";
 import MobileMenu from "./MobileMenu";
 import HamburgerButton from "./HamburgerButton";
+import { useCart } from "@/context/CartContext";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const { totalCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,8 +27,8 @@ export default function Header() {
   return (
     <>
       <header
-        className={`sticky w-full top-0 z-30 h-20 flex items-center transition-all duration-300 text-sm tracking-widest text-black
-        ${scrolled ? "bg-white shadow-md" : "bg-transparent"}`}
+        className={`sticky w-full top-0 z-30 h-20 flex items-center transition-all duration-300 text-sm tracking-widest text-ink
+        ${scrolled ? "bg-cream shadow-md" : "bg-transparent"}`}
       >
         <div className="flex items-center justify-between w-full px-4 md:px-10 lg:px-36">
           <nav className="hidden md:flex gap-12">
@@ -35,10 +38,13 @@ export default function Header() {
 
           <div className="absolute left-1/2 -translate-x-1/2">
             <Link href="/">
-              <img
-                className="h-12 md:h-16 lg:h-20"
+              <Image
                 src="/images/logo/logo.png"
                 alt="Logo"
+                width={275}
+                height={200}
+                priority
+                className="h-12 md:h-16 lg:h-20 w-auto"
               />
             </Link>
           </div>
@@ -46,10 +52,15 @@ export default function Header() {
           <nav className="hidden md:flex gap-12">
             <Link href="/contact">KONTAK</Link>
             <Link href="/gallery">GALERI</Link>
-            <Link href="/" className="text-xl">
+            <Link href="/cart" className="relative text-xl" aria-label="Keranjang Saya">
               <BiShoppingBag />
+              {totalCount > 0 && (
+                <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-medium text-white">
+                  {totalCount}
+                </span>
+              )}
             </Link>
-            <Link href="/" className="text-xl">
+            <Link href="/login" className="text-xl" aria-label="Masuk">
               <BiLogIn />
             </Link>
           </nav>

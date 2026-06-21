@@ -1,7 +1,7 @@
 "use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Pagination, Autoplay } from "swiper/modules";
 import Image from "next/image";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -22,6 +22,7 @@ export default function Slider() {
               src="/images/slider/5.jpg"
               alt="Sempe Dollar Murni Collection"
               fill
+              sizes="100vw"
               className="object-cover"
               priority
             />
@@ -41,6 +42,7 @@ export default function Slider() {
               src="/images/slider/4.jpg"
               alt="Sempe Dollar Collection Slider"
               fill
+              sizes="100vw"
               className="object-cover"
             />
           </div>
