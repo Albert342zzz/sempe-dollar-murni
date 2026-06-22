@@ -1,8 +1,8 @@
 // Pusat data kontak Sempe Dollar Murni.
 // Ganti seluruh nilai placeholder di bawah dengan data resmi perusahaan.
 export const contact = {
-  whatsapp: "6281234567890", // format internasional, tanpa tanda "+"
-  whatsappDisplay: "+62 812-3456-7890",
+  whatsapp: "6285156924502", // format internasional, tanpa tanda "+"
+  whatsappDisplay: "0851-5692-4502",
   email: "info@sempedollarmurni.com",
   address: "Temanggung, Jawa Tengah, Indonesia",
   hours: "Senin - Sabtu, 08.00 - 17.00 WIB",

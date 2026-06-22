@@ -4,7 +4,13 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FaWhatsapp } from "react-icons/fa";
-import { FiTrash2, FiMinus, FiPlus, FiShoppingBag } from "react-icons/fi";
+import {
+  FiTrash2,
+  FiMinus,
+  FiPlus,
+  FiShoppingBag,
+  FiCheckCircle,
+} from "react-icons/fi";
 import { useCart } from "@/context/CartContext";
 import {
   flavors,
@@ -17,6 +23,16 @@ import { waLink } from "@/lib/contact";
 
 const selectClass =
   "rounded-full border border-brown/20 bg-cream px-3 py-1.5 text-sm text-ink outline-none transition focus:border-terracotta";
+
+const inputClass =
+  "w-full rounded-xl border border-brown/20 px-4 py-2.5 text-sm text-ink outline-none transition focus:border-terracotta focus:ring-2 focus:ring-terracotta/15";
+
+type CreatedOrder = {
+  id: number;
+  customerName: string;
+  total: number;
+  items: { flavorId: string; sizeLabel: string; qty: number; price: number }[];
+};
 
 function AddOrderRow({
   onAdd,
@@ -78,6 +94,108 @@ export default function CartView() {
     clearCart,
   } = useCart();
 
+  const [customerName, setCustomerName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successOrder, setSuccessOrder] = useState<CreatedOrder | null>(null);
+
+  async function handleCheckout() {
+    setError(null);
+
+    if (!customerName.trim() || !phone.trim()) {
+      setError("Nama dan nomor WhatsApp wajib diisi.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: customerName.trim(),
+          phone: phone.trim(),
+          items: items.map((it) => ({
+            flavorId: it.flavorId,
+            sizeLabel: it.size,
+            qty: it.qty,
+          })),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Gagal membuat pesanan.");
+      }
+
+      const order: CreatedOrder = await res.json();
+      setSuccessOrder(order);
+      clearCart();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Terjadi kesalahan.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  // Tampilan setelah pesanan berhasil dibuat.
+  if (successOrder) {
+    const waMessage = `Halo Sempe Dollar Murni, saya sudah membuat pesanan #${
+      successOrder.id
+    }:\n\n${successOrder.items
+      .map(
+        (it, i) =>
+          `${i + 1}. Sempe ${getFlavor(it.flavorId)?.name ?? it.flavorId} (${
+            it.sizeLabel
+          }) x${it.qty}`
+      )
+      .join("\n")}\n\nTotal: ${formatRupiah(successOrder.total)}\nNama: ${
+      successOrder.customerName
+    }\n\nMohon konfirmasi ketersediaan & pembayaran.`;
+
+    return (
+      <div className="mx-auto max-w-xl rounded-3xl border border-brown/15 bg-cream p-10 text-center">
+        <FiCheckCircle className="mx-auto text-5xl text-olive" />
+        <h2 className="mt-4 text-2xl font-semibold text-ink">
+          Pesanan Berhasil Dibuat!
+        </h2>
+        <p className="mt-2 text-ink/60">
+          Nomor pesanan kamu:{" "}
+          <span className="font-semibold text-ink">#{successOrder.id}</span>
+        </p>
+        <p className="mt-1 text-ink/60">
+          Total:{" "}
+          <span className="font-semibold text-ink">
+            {formatRupiah(successOrder.total)}
+          </span>
+        </p>
+        <p className="mt-4 text-sm text-ink/50">
+          Kirim detail pesanan ke WhatsApp kami untuk konfirmasi pembayaran &
+          pengiriman.
+        </p>
+
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <a
+            href={waLink(waMessage)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown"
+          >
+            <FaWhatsapp className="text-base" />
+            Kirim ke WhatsApp
+          </a>
+          <Link
+            href="/product"
+            className="inline-block rounded-full border border-brown/30 px-6 py-3 text-sm text-ink transition hover:bg-cream-soft"
+          >
+            Belanja Lagi
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div className="rounded-3xl border border-brown/15 bg-cream p-12 text-center">
@@ -102,17 +220,6 @@ export default function CartView() {
     (sum, it) => sum + getPrice(it.size) * it.qty,
     0
   );
-
-  const orderMessage = `Halo Sempe Dollar Murni, saya ingin memesan:\n\n${items
-    .map((it, idx) => {
-      const f = getFlavor(it.flavorId);
-      return `${idx + 1}. Sempe ${f?.name ?? it.flavorId} (${it.size}) x${
-        it.qty
-      } - ${formatRupiah(getPrice(it.size) * it.qty)}`;
-    })
-    .join(
-      "\n"
-    )}\n\nTotal: ${totalCount} item\nTotal harga: ${formatRupiah(grandTotal)}`;
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
@@ -234,7 +341,7 @@ export default function CartView() {
         <AddOrderRow onAdd={addItem} />
       </div>
 
-      {/* Ringkasan */}
+      {/* Ringkasan & checkout */}
       <aside className="h-fit rounded-3xl border border-brown/15 bg-cream p-6">
         <h2 className="text-lg font-semibold text-ink">Ringkasan Pesanan</h2>
 
@@ -250,20 +357,45 @@ export default function CartView() {
           </span>
         </div>
 
-        <p className="mt-4 text-xs leading-relaxed text-ink/50">
-          Harga belum termasuk ongkos kirim. Konfirmasi akhir dilakukan melalui
-          WhatsApp sesuai ketersediaan stok.
-        </p>
+        {/* Data pemesan */}
+        <div className="mt-6 space-y-3 border-t border-brown/10 pt-6">
+          <div>
+            <label htmlFor="nama" className="mb-1.5 block text-sm font-medium">
+              Nama
+            </label>
+            <input
+              id="nama"
+              type="text"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+              placeholder="Nama lengkap"
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label htmlFor="telp" className="mb-1.5 block text-sm font-medium">
+              No. WhatsApp
+            </label>
+            <input
+              id="telp"
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="08xxxxxxxxxx"
+              className={inputClass}
+            />
+          </div>
+        </div>
 
-        <a
-          href={waLink(orderMessage)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown"
+        {error && <p className="mt-3 text-sm text-terracotta">{error}</p>}
+
+        <button
+          onClick={handleCheckout}
+          disabled={submitting}
+          className="mt-5 w-full rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <FaWhatsapp className="text-base" />
-          Pesan via WhatsApp
-        </a>
+          {submitting ? "Memproses..." : "Buat Pesanan"}
+        </button>
 
         <button
           onClick={clearCart}

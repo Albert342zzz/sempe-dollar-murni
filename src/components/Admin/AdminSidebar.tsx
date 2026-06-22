@@ -56,13 +56,13 @@ export default function AdminSidebar() {
           <FiArrowLeft className="text-base" />
           Kembali ke Situs
         </Link>
-        <Link
-          href="/login"
+        <a
+          href="/api/admin/logout"
           className="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition hover:bg-cream/10 hover:text-cream"
         >
           <FiLogOut className="text-base" />
           Keluar
-        </Link>
+        </a>
       </div>
     </aside>
   );

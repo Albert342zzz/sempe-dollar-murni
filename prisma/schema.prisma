@@ -1,0 +1,56 @@
+// Skema database Sempe Dollar Murni
+// Dokumentasi: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Rasa Sempe (id memakai slug, mis. "original", "keju")
+model Flavor {
+  id          String      @id
+  name        String
+  description String
+  accent      String
+  image       String
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+}
+
+// Ukuran kemasan beserta harganya (dalam Rupiah)
+model Size {
+  id    Int    @id @default(autoincrement())
+  label String @unique // "250gr", "500gr", "1kg"
+  price Int
+}
+
+model Order {
+  id           Int         @id @default(autoincrement())
+  customerName String
+  phone        String
+  status       OrderStatus @default(BARU)
+  total        Int // total harga (Rupiah)
+  createdAt    DateTime    @default(now())
+  items        OrderItem[]
+}
+
+model OrderItem {
+  id        Int    @id @default(autoincrement())
+  order     Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   Int
+  flavor    Flavor @relation(fields: [flavorId], references: [id])
+  flavorId  String
+  sizeLabel String
+  qty       Int
+  price     Int // harga satuan saat pemesanan (Rupiah)
+}
+
+enum OrderStatus {
+  BARU
+  DIPROSES
+  SELESAI
+}
