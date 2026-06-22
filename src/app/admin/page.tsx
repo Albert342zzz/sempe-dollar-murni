@@ -1,55 +1,79 @@
-import {
-  stats,
-  monthlySales,
-  flavorSales,
-  recentOrders,
-  type OrderStatus,
-} from "@/lib/adminData";
-import { formatRupiah } from "@/lib/flavors";
+import { prisma } from "@/lib/prisma";
+import { getFlavor, formatRupiah } from "@/lib/flavors";
+
+// Selalu render saat request (ambil data terbaru dari DB), jangan diprerender
+// saat build (build tidak punya koneksi ke database).
+export const dynamic = "force-dynamic";
+
+const namaBulan = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
+];
+
+const tanggalFmt = new Intl.DateTimeFormat("id-ID", {
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
+const statusLabel: Record<string, string> = {
+  BARU: "Baru",
+  DIPROSES: "Diproses",
+  SELESAI: "Selesai",
+};
+
+const statusStyle: Record<string, string> = {
+  BARU: "bg-terracotta/10 text-terracotta",
+  DIPROSES: "bg-gold/20 text-[#8a6d0f]",
+  SELESAI: "bg-olive/15 text-olive",
+};
 
 function StatCard({
   label,
   value,
-  delta,
-  up,
+  sub,
 }: {
   label: string;
   value: string;
-  delta: string;
-  up: boolean;
+  sub: string;
 }) {
   return (
     <div className="rounded-2xl border border-brown/15 bg-cream p-5">
       <p className="text-sm text-ink/60">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
-      <p className={`mt-1 text-xs ${up ? "text-olive" : "text-terracotta"}`}>
-        {delta} dari bulan lalu
-      </p>
+      <p className="mt-1 text-xs text-ink/50">{sub}</p>
     </div>
   );
 }
 
-function SalesBarChart() {
-  const max = Math.max(...monthlySales.map((m) => m.value));
+function SalesBarChart({ data }: { data: { label: string; value: number }[] }) {
+  const max = Math.max(...data.map((d) => d.value), 1);
   return (
     <div>
       <div className="flex h-48 items-end gap-3">
-        {monthlySales.map((m) => (
+        {data.map((d) => (
           <div
-            key={m.month}
+            key={d.label}
             className="flex-1 rounded-t-lg bg-terracotta/80 transition hover:bg-terracotta"
-            style={{ height: `${(m.value / max) * 100}%` }}
-            title={formatRupiah(m.value)}
+            style={{ height: `${Math.max((d.value / max) * 100, 2)}%` }}
+            title={formatRupiah(d.value)}
           />
         ))}
       </div>
       <div className="mt-2 flex gap-3">
-        {monthlySales.map((m) => (
-          <span
-            key={m.month}
-            className="flex-1 text-center text-xs text-ink/60"
-          >
-            {m.month}
+        {data.map((d) => (
+          <span key={d.label} className="flex-1 text-center text-xs text-ink/60">
+            {d.label}
           </span>
         ))}
       </div>
@@ -57,12 +81,18 @@ function SalesBarChart() {
   );
 }
 
-function FlavorBars() {
-  const top = flavorSales.slice(0, 6);
-  const max = Math.max(...top.map((f) => f.sold));
+function FlavorBars({
+  data,
+}: {
+  data: { id: string; name: string; accent: string; sold: number }[];
+}) {
+  if (data.length === 0) {
+    return <p className="text-sm text-ink/50">Belum ada data penjualan.</p>;
+  }
+  const max = Math.max(...data.map((f) => f.sold), 1);
   return (
     <div className="space-y-4">
-      {top.map((f) => (
+      {data.map((f) => (
         <div key={f.id}>
           <div className="mb-1 flex justify-between text-sm">
             <span className="text-ink/80">{f.name}</span>
@@ -83,50 +113,89 @@ function FlavorBars() {
   );
 }
 
-const statusStyle: Record<OrderStatus, string> = {
-  Selesai: "bg-olive/15 text-olive",
-  Diproses: "bg-gold/20 text-[#8a6d0f]",
-  Baru: "bg-terracotta/10 text-terracotta",
-};
+export default async function AdminDashboard() {
+  const orders = await prisma.order.findMany({
+    include: { items: true },
+    orderBy: { createdAt: "desc" },
+  });
 
-function OrdersTable() {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full min-w-[640px] text-left text-sm">
-        <thead>
-          <tr className="border-b border-brown/15 text-ink/50">
-            <th className="pb-3 font-medium">ID</th>
-            <th className="pb-3 font-medium">Pelanggan</th>
-            <th className="pb-3 font-medium">Produk</th>
-            <th className="pb-3 font-medium">Jumlah</th>
-            <th className="pb-3 font-medium">Total</th>
-            <th className="pb-3 font-medium">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {recentOrders.map((o) => (
-            <tr key={o.id} className="border-b border-brown/10 last:border-0">
-              <td className="py-3 font-medium text-ink">{o.id}</td>
-              <td className="py-3 text-ink/80">{o.customer}</td>
-              <td className="py-3 text-ink/80">{o.item}</td>
-              <td className="py-3 text-ink/80">{o.qty}</td>
-              <td className="py-3 text-ink/80">{o.total}</td>
-              <td className="py-3">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyle[o.status]}`}
-                >
-                  {o.status}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+  const now = new Date();
+
+  // Statistik
+  const totalRevenue = orders.reduce((s, o) => s + o.total, 0);
+  const totalSold = orders.reduce(
+    (s, o) => s + o.items.reduce((a, i) => a + i.qty, 0),
+    0
   );
-}
+  const uniqueCustomers = new Set(orders.map((o) => o.phone)).size;
+  const isThisMonth = (d: Date) =>
+    d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  const thisMonthOrders = orders.filter((o) => isThisMonth(o.createdAt));
+  const thisMonthRevenue = thisMonthOrders.reduce((s, o) => s + o.total, 0);
 
-export default function AdminDashboard() {
+  const stats = [
+    {
+      label: "Total Pendapatan",
+      value: formatRupiah(totalRevenue),
+      sub: `${formatRupiah(thisMonthRevenue)} bulan ini`,
+    },
+    {
+      label: "Pesanan",
+      value: String(orders.length),
+      sub: `${thisMonthOrders.length} bulan ini`,
+    },
+    {
+      label: "Produk Terjual",
+      value: String(totalSold),
+      sub: "total item terjual",
+    },
+    {
+      label: "Pelanggan",
+      value: String(uniqueCustomers),
+      sub: "nomor unik",
+    },
+  ];
+
+  // Penjualan 6 bulan terakhir
+  const monthlyBuckets = Array.from({ length: 6 }, (_, idx) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1);
+    return { year: d.getFullYear(), month: d.getMonth(), value: 0 };
+  });
+  for (const o of orders) {
+    const bucket = monthlyBuckets.find(
+      (b) =>
+        b.year === o.createdAt.getFullYear() &&
+        b.month === o.createdAt.getMonth()
+    );
+    if (bucket) bucket.value += o.total;
+  }
+  const monthlySales = monthlyBuckets.map((b) => ({
+    label: namaBulan[b.month],
+    value: b.value,
+  }));
+
+  // Rasa terlaris
+  const soldByFlavor = new Map<string, number>();
+  for (const o of orders) {
+    for (const it of o.items) {
+      soldByFlavor.set(
+        it.flavorId,
+        (soldByFlavor.get(it.flavorId) ?? 0) + it.qty
+      );
+    }
+  }
+  const flavorSales = [...soldByFlavor.entries()]
+    .map(([id, sold]) => ({
+      id,
+      name: getFlavor(id)?.name ?? id,
+      accent: getFlavor(id)?.accent ?? "#8c5a3c",
+      sold,
+    }))
+    .sort((a, b) => b.sold - a.sold)
+    .slice(0, 6);
+
+  const recentOrders = orders.slice(0, 8);
+
   return (
     <div className="p-6 md:p-8">
       {/* Header */}
@@ -156,21 +225,79 @@ export default function AdminDashboard() {
             Penjualan 6 Bulan Terakhir
           </h2>
           <p className="mb-6 text-sm text-ink/50">Total pendapatan per bulan</p>
-          <SalesBarChart />
+          <SalesBarChart data={monthlySales} />
         </div>
 
         <div className="rounded-2xl border border-brown/15 bg-cream p-6">
           <h2 className="text-lg font-semibold text-ink">Rasa Terlaris</h2>
           <p className="mb-6 text-sm text-ink/50">Jumlah terjual per rasa</p>
-          <FlavorBars />
+          <FlavorBars data={flavorSales} />
         </div>
       </div>
 
       {/* Pesanan terbaru */}
       <div className="mt-6 rounded-2xl border border-brown/15 bg-cream p-6">
         <h2 className="text-lg font-semibold text-ink">Pesanan Terbaru</h2>
-        <p className="mb-4 text-sm text-ink/50">5 pesanan terakhir</p>
-        <OrdersTable />
+        <p className="mb-4 text-sm text-ink/50">
+          {orders.length === 0
+            ? "Belum ada pesanan"
+            : `${recentOrders.length} pesanan terakhir`}
+        </p>
+
+        {orders.length === 0 ? (
+          <p className="py-6 text-center text-sm text-ink/50">
+            Pesanan yang masuk lewat checkout akan muncul di sini.
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-brown/15 text-ink/50">
+                  <th className="pb-3 font-medium">ID</th>
+                  <th className="pb-3 font-medium">Tanggal</th>
+                  <th className="pb-3 font-medium">Pelanggan</th>
+                  <th className="pb-3 font-medium">Produk</th>
+                  <th className="pb-3 font-medium">Total</th>
+                  <th className="pb-3 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.map((o) => (
+                  <tr
+                    key={o.id}
+                    className="border-b border-brown/10 last:border-0"
+                  >
+                    <td className="py-3 font-medium text-ink">#{o.id}</td>
+                    <td className="py-3 text-ink/70">
+                      {tanggalFmt.format(o.createdAt)}
+                    </td>
+                    <td className="py-3 text-ink/80">{o.customerName}</td>
+                    <td className="py-3 text-ink/80">
+                      {o.items
+                        .map(
+                          (i) =>
+                            `${getFlavor(i.flavorId)?.name ?? i.flavorId} (${
+                              i.sizeLabel
+                            }) ×${i.qty}`
+                        )
+                        .join(", ")}
+                    </td>
+                    <td className="py-3 text-ink/80">
+                      {formatRupiah(o.total)}
+                    </td>
+                    <td className="py-3">
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyle[o.status]}`}
+                      >
+                        {statusLabel[o.status] ?? o.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

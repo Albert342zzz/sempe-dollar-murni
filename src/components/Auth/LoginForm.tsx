@@ -10,12 +10,30 @@ export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: hubungkan dengan sistem autentikasi (mis. API / NextAuth).
-    // Untuk saat ini, langsung arahkan ke dashboard admin sebagai demo.
-    router.push("/admin");
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Gagal masuk.");
+      }
+      router.push("/admin");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Terjadi kesalahan.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   const inputClass =
@@ -80,11 +98,14 @@ export default function LoginForm() {
         </a>
       </div>
 
+      {error && <p className="text-sm text-terracotta">{error}</p>}
+
       <button
         type="submit"
-        className="w-full rounded-full bg-terracotta px-6 py-3 text-sm font-medium text-white transition hover:bg-brown"
+        disabled={loading}
+        className="w-full rounded-full bg-terracotta px-6 py-3 text-sm font-medium text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Masuk
+        {loading ? "Memproses..." : "Masuk"}
       </button>
 
       <div className="flex items-center gap-4">
