@@ -1,26 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   FiGrid,
   FiBox,
   FiShoppingBag,
-  FiUsers,
-  FiBarChart2,
-  FiSettings,
   FiArrowLeft,
   FiLogOut,
 } from "react-icons/fi";
 import { eloquia } from "@/lib/fonts";
 
 const nav = [
-  { icon: FiGrid, label: "Dashboard", href: "/admin", active: true },
-  { icon: FiBox, label: "Produk", href: "#" },
-  { icon: FiShoppingBag, label: "Pesanan", href: "#" },
-  { icon: FiUsers, label: "Pelanggan", href: "#" },
-  { icon: FiBarChart2, label: "Laporan", href: "#" },
-  { icon: FiSettings, label: "Pengaturan", href: "#" },
+  { icon: FiGrid, label: "Dashboard", href: "/admin" },
+  { icon: FiBox, label: "Produk", href: "/admin/products" },
+  { icon: FiShoppingBag, label: "Pesanan", href: "/admin/orders" },
 ];
 
 export default function AdminSidebar() {
+  const pathname = usePathname();
+
   return (
     <aside className="hidden w-64 shrink-0 flex-col bg-ink text-cream/70 md:flex">
       <div className="p-6">
@@ -31,12 +30,13 @@ export default function AdminSidebar() {
       <nav className="flex-1 space-y-1 px-3">
         {nav.map((item) => {
           const Icon = item.icon;
+          const active = item.href !== "#" && pathname === item.href;
           return (
             <Link
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm transition ${
-                item.active
+                active
                   ? "bg-terracotta text-white"
                   : "hover:bg-cream/10 hover:text-cream"
               }`}

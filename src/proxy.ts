@@ -2,8 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
 
-// Lindungi semua halaman /admin: harus punya sesi admin yang valid.
-export async function middleware(req: NextRequest) {
+// Proxy (formerly "middleware") — protect every /admin page:
+// a valid admin session is required.
+export async function proxy(req: NextRequest) {
   const token = req.cookies.get(SESSION_COOKIE)?.value;
   const session = await verifySession(token);
 

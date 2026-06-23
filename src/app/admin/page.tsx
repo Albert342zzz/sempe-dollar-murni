@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { getFlavor, formatRupiah } from "@/lib/flavors";
+import RecentOrdersTable from "@/components/Admin/RecentOrdersTable";
 
-// Selalu render saat request (ambil data terbaru dari DB), jangan diprerender
-// saat build (build tidak punya koneksi ke database).
+// Render on each request to read fresh data from the DB; never prerender at
+// build time (the build has no database connection).
 export const dynamic = "force-dynamic";
 
 const namaBulan = [
@@ -19,24 +20,6 @@ const namaBulan = [
   "Nov",
   "Des",
 ];
-
-const tanggalFmt = new Intl.DateTimeFormat("id-ID", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
-
-const statusLabel: Record<string, string> = {
-  BARU: "Baru",
-  DIPROSES: "Diproses",
-  SELESAI: "Selesai",
-};
-
-const statusStyle: Record<string, string> = {
-  BARU: "bg-terracotta/10 text-terracotta",
-  DIPROSES: "bg-gold/20 text-[#8a6d0f]",
-  SELESAI: "bg-olive/15 text-olive",
-};
 
 function StatCard({
   label,
@@ -194,7 +177,19 @@ export default async function AdminDashboard() {
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 6);
 
-  const recentOrders = orders.slice(0, 8);
+  const recentOrdersData = orders.map((o) => ({
+    id: o.id,
+    createdAt: o.createdAt.toISOString(),
+    customerName: o.customerName,
+    product: o.items
+      .map(
+        (i) =>
+          `${getFlavor(i.flavorId)?.name ?? i.flavorId} (${i.sizeLabel}) ×${i.qty}`
+      )
+      .join(", "),
+    total: o.total,
+    status: o.status as "BARU" | "DIPROSES" | "SELESAI",
+  }));
 
   return (
     <div className="p-6 md:p-8">
@@ -238,66 +233,8 @@ export default async function AdminDashboard() {
       {/* Pesanan terbaru */}
       <div className="mt-6 rounded-2xl border border-brown/15 bg-cream p-6">
         <h2 className="text-lg font-semibold text-ink">Pesanan Terbaru</h2>
-        <p className="mb-4 text-sm text-ink/50">
-          {orders.length === 0
-            ? "Belum ada pesanan"
-            : `${recentOrders.length} pesanan terakhir`}
-        </p>
-
-        {orders.length === 0 ? (
-          <p className="py-6 text-center text-sm text-ink/50">
-            Pesanan yang masuk lewat checkout akan muncul di sini.
-          </p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-brown/15 text-ink/50">
-                  <th className="pb-3 font-medium">ID</th>
-                  <th className="pb-3 font-medium">Tanggal</th>
-                  <th className="pb-3 font-medium">Pelanggan</th>
-                  <th className="pb-3 font-medium">Produk</th>
-                  <th className="pb-3 font-medium">Total</th>
-                  <th className="pb-3 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((o) => (
-                  <tr
-                    key={o.id}
-                    className="border-b border-brown/10 last:border-0"
-                  >
-                    <td className="py-3 font-medium text-ink">#{o.id}</td>
-                    <td className="py-3 text-ink/70">
-                      {tanggalFmt.format(o.createdAt)}
-                    </td>
-                    <td className="py-3 text-ink/80">{o.customerName}</td>
-                    <td className="py-3 text-ink/80">
-                      {o.items
-                        .map(
-                          (i) =>
-                            `${getFlavor(i.flavorId)?.name ?? i.flavorId} (${
-                              i.sizeLabel
-                            }) ×${i.qty}`
-                        )
-                        .join(", ")}
-                    </td>
-                    <td className="py-3 text-ink/80">
-                      {formatRupiah(o.total)}
-                    </td>
-                    <td className="py-3">
-                      <span
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${statusStyle[o.status]}`}
-                      >
-                        {statusLabel[o.status] ?? o.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <p className="mb-4 text-sm text-ink/50">Diurutkan dari yang terbaru</p>
+        <RecentOrdersTable orders={recentOrdersData} />
       </div>
     </div>
   );
