@@ -21,8 +21,7 @@ export default function MobileMenu({ menuOpen, setMenuOpen }: MobileMenuProps) {
               alt="Logo"
               width={275}
               height={200}
-              className="h-12 md:h-16 lg:h-20"
-              style={{ width: "auto" }}
+              className="h-12 w-auto md:h-16 lg:h-20"
             />
           </Link>
         </div>

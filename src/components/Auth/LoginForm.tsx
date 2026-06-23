@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { FaGoogle } from "react-icons/fa";
+import { createClient } from "@/lib/supabase/client";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -12,6 +13,22 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  async function signInWithGoogle() {
+    setError(null);
+    setGoogleLoading(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) {
+      setError(error.message);
+      setGoogleLoading(false);
+    }
+    // on success the browser is redirected to Google automatically
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -116,10 +133,12 @@ export default function LoginForm() {
 
       <button
         type="button"
-        className="flex w-full items-center justify-center gap-2 rounded-full border border-brown/20 px-6 py-3 text-sm text-ink transition hover:bg-cream-soft"
+        onClick={signInWithGoogle}
+        disabled={googleLoading}
+        className="flex w-full items-center justify-center gap-2 rounded-full border border-brown/20 px-6 py-3 text-sm text-ink transition hover:bg-cream-soft disabled:opacity-60"
       >
         <FaGoogle className="text-base text-terracotta" />
-        Masuk dengan Google
+        {googleLoading ? "Mengalihkan..." : "Masuk dengan Google"}
       </button>
     </form>
   );

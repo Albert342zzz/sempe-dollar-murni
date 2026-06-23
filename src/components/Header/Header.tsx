@@ -3,9 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { BiShoppingBag, BiLogIn } from "react-icons/bi";
+import { BiShoppingBag } from "react-icons/bi";
 import MobileMenu from "./MobileMenu";
 import HamburgerButton from "./HamburgerButton";
+import UserMenu from "./UserMenu";
 import { useCart } from "@/context/CartContext";
 
 export default function Header() {
@@ -31,8 +32,7 @@ export default function Header() {
                 width={275}
                 height={200}
                 priority
-                className="h-12 md:h-16 lg:h-20"
-                style={{ width: "auto" }}
+                className="h-12 w-auto md:h-16 lg:h-20"
               />
             </Link>
           </div>
@@ -48,9 +48,7 @@ export default function Header() {
                 </span>
               )}
             </Link>
-            <Link href="/login" className="text-xl" aria-label="Masuk">
-              <BiLogIn />
-            </Link>
+            <UserMenu />
           </nav>
         </div>
       </header>
