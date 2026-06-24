@@ -6,7 +6,7 @@ import { flavors, sizes, priceBySize } from "../src/lib/flavors";
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-// Mengisi database dengan data rasa & ukuran dari lib/flavors.ts.
+// Seeds the database with flavors, sizes, and initial per-flavor prices from lib/flavors.ts.
 async function main() {
   for (const f of flavors) {
     await prisma.flavor.upsert({
@@ -27,6 +27,9 @@ async function main() {
     });
   }
 
+  // Remove sizes no longer in the list (cascades to FlavorPrice).
+  await prisma.size.deleteMany({ where: { label: { notIn: sizes } } });
+
   for (const label of sizes) {
     await prisma.size.upsert({
       where: { label },
@@ -35,7 +38,20 @@ async function main() {
     });
   }
 
-  console.log(`Seed selesai: ${flavors.length} rasa, ${sizes.length} ukuran.`);
+  // Per-flavor prices, seeded from the default size price.
+  // Admins can adjust each flavor's price from the Products page.
+  const sizeRows = await prisma.size.findMany();
+  for (const f of flavors) {
+    for (const s of sizeRows) {
+      await prisma.flavorPrice.upsert({
+        where: { flavorId_sizeId: { flavorId: f.id, sizeId: s.id } },
+        update: {},
+        create: { flavorId: f.id, sizeId: s.id, price: s.price },
+      });
+    }
+  }
+
+  console.log(`Seed done: ${flavors.length} flavors, ${sizes.length} sizes.`);
 }
 
 main()

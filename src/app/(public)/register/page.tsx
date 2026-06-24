@@ -46,7 +46,8 @@ export default function RegisterPage() {
               Daftar Akun
             </h1>
             <p className="mt-2 text-sm text-ink/60">
-              Daftar untuk mulai memesan Sempe favoritmu.
+              Daftar agar memesan lebih mudah — bisa pilih banyak rasa, pakai
+              keranjang, dan lihat riwayat pesanan.
             </p>
             <p className="mt-1 text-xs text-ink/40">
               Kami akan meminta nama panggilan dan nomor HP setelah masuk.

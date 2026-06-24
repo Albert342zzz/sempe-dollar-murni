@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa";
 import { MdEmail, MdLocationOn } from "react-icons/md";
+import { BiStore } from "react-icons/bi";
 import { contact, waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
 
@@ -23,6 +24,8 @@ export default function Footer() {
           <div className="mt-6 flex gap-3">
             <a
               href={contact.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Instagram"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 transition hover:bg-gold hover:text-ink"
             >
@@ -30,10 +33,21 @@ export default function Footer() {
             </a>
             <a
               href={contact.facebook}
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label="Facebook"
               className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 transition hover:bg-gold hover:text-ink"
             >
               <FaFacebookF />
+            </a>
+            <a
+              href={contact.tokopedia}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Tokopedia"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-cream/10 transition hover:bg-gold hover:text-ink"
+            >
+              <BiStore />
             </a>
             <a
               href={waLink()}

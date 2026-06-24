@@ -38,12 +38,16 @@ export async function POST(req: Request) {
   }
 
   // Resolve prices from the DB — never trust prices sent by the client.
-  const sizes = await prisma.size.findMany();
-  const priceByLabel = new Map(sizes.map((s) => [s.label, s.price]));
+  const flavorPrices = await prisma.flavorPrice.findMany({
+    include: { size: true },
+  });
+  const priceByKey = new Map(
+    flavorPrices.map((fp) => [`${fp.flavorId}__${fp.size.label}`, fp.price])
+  );
 
   let total = 0;
   const itemsData = items.map((it) => {
-    const price = priceByLabel.get(it.sizeLabel) ?? 0;
+    const price = priceByKey.get(`${it.flavorId}__${it.sizeLabel}`) ?? 0;
     total += price * it.qty;
     return {
       flavorId: it.flavorId,

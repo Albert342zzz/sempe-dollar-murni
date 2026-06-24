@@ -2,18 +2,32 @@ export type Flavor = {
   id: string;
   name: string;
   description: string;
-  accent: string; // warna tema (hex) untuk tiap rasa
+  accent: string; // theme color (hex) for each flavor
   image: string;
 };
 
-// Pilihan ukuran kemasan yang tersedia untuk dipesan.
-export const sizes = ["250gr", "500gr", "1kg"];
+// Available packaging sizes.
+export const sizes = [
+  "150gr",
+  "230gr",
+  "250gr",
+  "350gr",
+  "500gr",
+  "700gr",
+  "3kg (karton)",
+  "3kg (kaleng)",
+];
 
-// Harga per ukuran (dummy — sesuaikan dengan harga resmi).
+// Default price per size — admins can override per flavor on the Products page.
 export const priceBySize: Record<string, number> = {
+  "150gr": 10000,
+  "230gr": 13000,
   "250gr": 15000,
-  "500gr": 28000,
-  "1kg": 50000,
+  "350gr": 22000,
+  "500gr": 30000,
+  "700gr": 40000,
+  "3kg (karton)": 150000,
+  "3kg (kaleng)": 175000,
 };
 
 export function getFlavor(id: string): Flavor | undefined {
@@ -34,9 +48,8 @@ export function formatRupiah(value: number): string {
   return rupiah.format(value);
 }
 
-// Sempe adalah satu produk dengan banyak varian rasa.
-// Semua rasa memakai foto produk yang sama untuk saat ini — tambahkan foto
-// khusus per rasa pada properti `image` bila sudah tersedia.
+// All flavors share the same product photo for now — add a per-flavor image
+// to the `image` field when available.
 const DEFAULT_IMAGE = "/images/product3.png";
 
 export const flavors: Flavor[] = [

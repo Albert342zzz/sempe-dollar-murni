@@ -12,20 +12,35 @@ datasource db {
 
 // Rasa Sempe (id memakai slug, mis. "original", "keju")
 model Flavor {
-  id          String      @id
+  id          String        @id
   name        String
   description String
   accent      String
   image       String
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime      @default(now())
   orderItems  OrderItem[]
+  prices      FlavorPrice[]
 }
 
-// Ukuran kemasan beserta harganya (dalam Rupiah)
+// Ukuran kemasan. `price` dipakai sebagai harga default/awal saat
+// membuat harga per rasa. Harga sebenarnya ada di FlavorPrice.
 model Size {
-  id    Int    @id @default(autoincrement())
-  label String @unique // "250gr", "500gr", "1kg"
-  price Int
+  id     Int           @id @default(autoincrement())
+  label  String        @unique // "250gr", "500gr", "1kg"
+  price  Int
+  prices FlavorPrice[]
+}
+
+// Harga per kombinasi rasa + ukuran (dalam Rupiah).
+model FlavorPrice {
+  id       Int    @id @default(autoincrement())
+  flavor   Flavor @relation(fields: [flavorId], references: [id], onDelete: Cascade)
+  flavorId String
+  size     Size   @relation(fields: [sizeId], references: [id], onDelete: Cascade)
+  sizeId   Int
+  price    Int
+
+  @@unique([flavorId, sizeId])
 }
 
 model Order {

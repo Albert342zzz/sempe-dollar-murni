@@ -31,7 +31,9 @@ export default function LoginPage() {
               Masuk
             </h1>
             <p className="mt-2 text-sm text-ink/60">
-              Ingin memesan? Masuk terlebih dahulu untuk membuat pesanan.
+              Login agar memesan lebih mudah — pilih banyak rasa sekaligus,
+              pakai keranjang, dan lihat riwayat pesananmu. Tanpa login pun tetap
+              bisa pesan langsung via WhatsApp.
             </p>
           </div>
 

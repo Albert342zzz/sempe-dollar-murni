@@ -13,14 +13,11 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 import { useCart } from "@/context/CartContext";
-import {
-  flavors,
-  sizes,
-  getFlavor,
-  getPrice,
-  formatRupiah,
-} from "@/lib/flavors";
+import { flavors, sizes, getFlavor, formatRupiah } from "@/lib/flavors";
+import { priceFor, type PriceMap } from "@/lib/prices";
 import { waLink } from "@/lib/contact";
+import { sanitizeName, sanitizePhone } from "@/lib/validation";
+import Spinner from "@/components/Spinner";
 
 const selectClass =
   "rounded-full border border-brown/20 bg-cream px-3 py-1.5 text-sm text-ink outline-none transition focus:border-terracotta";
@@ -83,7 +80,7 @@ function AddOrderRow({
   );
 }
 
-export default function CartView() {
+export default function CartView({ prices }: { prices: PriceMap }) {
   const {
     items,
     totalCount,
@@ -244,7 +241,7 @@ export default function CartView() {
   }
 
   const grandTotal = items.reduce(
-    (sum, it) => sum + getPrice(it.size) * it.qty,
+    (sum, it) => sum + priceFor(prices, it.flavorId, it.size) * it.qty,
     0
   );
 
@@ -284,7 +281,7 @@ export default function CartView() {
                       {flavor?.name ?? it.flavorId}
                     </h3>
                     <p className="mt-1 text-sm font-medium text-terracotta">
-                      {formatRupiah(getPrice(it.size))}
+                      {formatRupiah(priceFor(prices, it.flavorId, it.size))}
                     </p>
                   </div>
                   <button
@@ -357,7 +354,7 @@ export default function CartView() {
                 <div className="mt-3 flex items-center justify-between border-t border-brown/10 pt-3 text-sm">
                   <span className="text-ink/60">Subtotal</span>
                   <span className="font-semibold text-ink">
-                    {formatRupiah(getPrice(it.size) * it.qty)}
+                    {formatRupiah(priceFor(prices, it.flavorId, it.size) * it.qty)}
                   </span>
                 </div>
               </div>
@@ -397,7 +394,7 @@ export default function CartView() {
               id="nama"
               type="text"
               value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
+              onChange={(e) => setCustomerName(sanitizeName(e.target.value))}
               placeholder="Nama lengkap"
               className={inputClass}
             />
@@ -409,8 +406,9 @@ export default function CartView() {
             <input
               id="telp"
               type="tel"
+              inputMode="numeric"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(sanitizePhone(e.target.value))}
               placeholder="08xxxxxxxxxx"
               className={inputClass}
             />
@@ -422,8 +420,9 @@ export default function CartView() {
         <button
           onClick={handleCheckout}
           disabled={submitting}
-          className="mt-5 w-full rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-60"
         >
+          {submitting && <Spinner className="h-4 w-4" />}
           {submitting ? "Memproses..." : "Buat Pesanan"}
         </button>
 
