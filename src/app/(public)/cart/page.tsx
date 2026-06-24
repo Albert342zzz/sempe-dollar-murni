@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/supabase/user";
 import CartView from "@/components/Cart/CartView";
 import { eloquia } from "@/lib/fonts";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Keranjang Saya - Sempe Dollar Murni",
@@ -8,7 +12,10 @@ export const metadata: Metadata = {
     "Atur pesanan Sempe favoritmu — pilih rasa, ukuran, dan jumlah, lalu kirim ke WhatsApp kami.",
 };
 
-export default function CartPage() {
+export default async function CartPage() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login?next=/cart");
+
   return (
     <main>
       <section className="bg-cream pt-16 pb-10">

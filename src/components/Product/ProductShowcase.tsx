@@ -1,24 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
 import { FiShoppingBag } from "react-icons/fi";
 import { flavors, sizes, getPrice, formatRupiah } from "@/lib/flavors";
 import { waLink } from "@/lib/contact";
 import { useCart } from "@/context/CartContext";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ProductShowcase() {
+  const router = useRouter();
   const [active, setActive] = useState(0);
   const [size, setSize] = useState(sizes[0]);
   const [added, setAdded] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const { addItem } = useCart();
   const flavor = flavors[active];
 
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  function requireLogin(action: () => void) {
+    if (!isLoggedIn) {
+      router.push("/login?next=/product");
+      return;
+    }
+    action();
+  }
+
   function handleAdd() {
-    addItem(flavor.id, size, 1);
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    requireLogin(() => {
+      addItem(flavor.id, size, 1);
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
+    });
+  }
+
+  function handleWhatsApp() {
+    requireLogin(() => {
+      window.open(
+        waLink(
+          `Halo Sempe Dollar Murni, saya ingin memesan Sempe rasa ${flavor.name} ukuran ${size}.`
+        ),
+        "_blank",
+        "noopener,noreferrer"
+      );
+    });
   }
 
   return (
@@ -92,17 +130,13 @@ export default function ProductShowcase() {
               Tambah ke Keranjang
             </button>
 
-            <a
-              href={waLink(
-                `Halo Sempe Dollar Murni, saya ingin memesan Sempe rasa ${flavor.name} ukuran ${size}.`
-              )}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={handleWhatsApp}
               className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown"
             >
               <FaWhatsapp className="text-base" />
               Pesan rasa ini
-            </a>
+            </button>
 
             {added && (
               <span className="text-sm font-medium text-olive">
@@ -110,6 +144,18 @@ export default function ProductShowcase() {
               </span>
             )}
           </div>
+
+          {isLoggedIn === false && (
+            <p className="mt-3 text-sm text-ink/50">
+              <Link
+                href="/login?next=/product"
+                className="text-terracotta hover:underline"
+              >
+                Login dulu
+              </Link>{" "}
+              untuk bisa memesan.
+            </p>
+          )}
         </div>
       </div>
 

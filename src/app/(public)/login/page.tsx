@@ -31,7 +31,7 @@ export default function LoginPage() {
               Masuk
             </h1>
             <p className="mt-2 text-sm text-ink/60">
-              Selamat datang kembali di Sempe Dollar Murni.
+              Ingin memesan? Masuk terlebih dahulu untuk membuat pesanan.
             </p>
           </div>
 
@@ -41,7 +41,7 @@ export default function LoginPage() {
 
           <p className="mt-6 text-center text-sm text-ink/60">
             Belum punya akun?{" "}
-            <Link href="#" className="font-medium text-terracotta hover:text-brown">
+            <Link href="/register" className="font-medium text-terracotta hover:text-brown">
               Daftar di sini
             </Link>
           </p>

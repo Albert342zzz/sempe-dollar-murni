@@ -32,10 +32,13 @@ model Order {
   id           Int         @id @default(autoincrement())
   customerName String
   phone        String
+  userId       String? // ID akun Supabase pemesan (null untuk tamu)
   status       OrderStatus @default(BARU)
   total        Int // total harga (Rupiah)
   createdAt    DateTime    @default(now())
   items        OrderItem[]
+
+  @@index([userId])
 }
 
 model OrderItem {
@@ -53,4 +56,19 @@ enum OrderStatus {
   BARU
   DIPROSES
   SELESAI
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model UserProfile {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique
+  email     String
+  nickname  String
+  phone     String
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
 }

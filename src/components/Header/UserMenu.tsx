@@ -4,14 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BiLogIn } from "react-icons/bi";
-import { FiLogOut } from "react-icons/fi";
+import { FiLogOut, FiShoppingBag, FiGrid } from "react-icons/fi";
 import { createClient } from "@/lib/supabase/client";
 
-type UserInfo = { email: string; name: string; avatar?: string };
+type UserInfo = { email: string; name: string };
 
 export default function UserMenu() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [nickname, setNickname] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -28,7 +30,6 @@ export default function UserMenu() {
         (u.user_metadata?.name as string) ??
         u.email ??
         "Akun",
-      avatar: u.user_metadata?.avatar_url as string | undefined,
     });
 
     supabase.auth
@@ -41,6 +42,23 @@ export default function UserMenu() {
 
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      /* eslint-disable react-hooks/set-state-in-effect */
+      setNickname(null);
+      setIsAdmin(false);
+      /* eslint-enable react-hooks/set-state-in-effect */
+      return;
+    }
+    fetch("/api/profile")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => {
+        setNickname(p?.nickname ?? null);
+        setIsAdmin(p?.role === "ADMIN");
+      })
+      .catch(() => {});
+  }, [user]);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -56,6 +74,8 @@ export default function UserMenu() {
     const supabase = createClient();
     await supabase.auth.signOut();
     setUser(null);
+    setNickname(null);
+    setIsAdmin(false);
     setOpen(false);
     router.refresh();
   }
@@ -68,36 +88,47 @@ export default function UserMenu() {
     );
   }
 
-  const initial = (user.name || user.email || "?").charAt(0).toUpperCase();
+  const displayName = nickname ?? user.name.split(" ")[0];
 
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Akun"
-        className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-terracotta text-sm font-medium text-white"
+        className="rounded-full bg-terracotta/10 px-3 py-1.5 text-sm font-medium text-terracotta transition hover:bg-terracotta/20"
       >
-        {user.avatar ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={user.avatar}
-            alt={user.name}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          initial
-        )}
+        Halo kak, {displayName}
       </button>
 
       {open && (
         <div className="absolute right-0 top-10 w-56 rounded-2xl border border-brown/15 bg-cream p-3 text-left shadow-lg">
           <p className="truncate px-2 text-sm font-medium text-ink">
-            {user.name}
+            {displayName}
           </p>
           <p className="truncate px-2 text-xs text-ink/50">{user.email}</p>
+
+          <div className="my-2 border-t border-brown/10" />
+
+          {isAdmin && (
+            <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm font-medium text-terracotta transition hover:bg-cream-soft"
+            >
+              <FiGrid /> Dashboard Admin
+            </Link>
+          )}
+
+          <Link
+            href="/my-orders"
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-ink/80 transition hover:bg-cream-soft"
+          >
+            <FiShoppingBag /> Pesanan Saya
+          </Link>
           <button
             onClick={logout}
-            className="mt-2 flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-ink/80 transition hover:bg-cream-soft"
+            className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-ink/80 transition hover:bg-cream-soft"
           >
             <FiLogOut /> Keluar
           </button>
