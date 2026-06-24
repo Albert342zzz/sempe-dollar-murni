@@ -9,6 +9,14 @@ import { createClient } from "@/lib/supabase/client";
 
 type UserInfo = { email: string; name: string };
 
+function getGreeting(): string {
+  const h = new Date().getHours();
+  if (h >= 4 && h < 11) return "Selamat pagi";
+  if (h >= 11 && h < 15) return "Selamat siang";
+  if (h >= 15 && h < 18) return "Selamat sore";
+  return "Selamat malam";
+}
+
 export default function UserMenu() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
@@ -80,28 +88,43 @@ export default function UserMenu() {
     router.refresh();
   }
 
+  // Not logged in — icon-only box in the corner
   if (!user) {
     return (
-      <Link href="/login" className="text-xl" aria-label="Masuk">
-        <BiLogIn />
+      <Link
+        href="/login"
+        aria-label="Masuk"
+        className="group flex h-full min-w-[60px] flex-col items-center justify-center border-l border-brown/20 bg-cream px-5 transition-all duration-200 hover:bg-terracotta/10"
+      >
+        <BiLogIn className="text-xl text-ink/60 transition-colors duration-200 group-hover:text-terracotta" />
+        <span className="mt-0.5 text-[9px] tracking-widest text-ink/40 transition-colors duration-200 group-hover:text-terracotta/70">
+          MASUK
+        </span>
       </Link>
     );
   }
 
   const displayName = nickname ?? user.name.split(" ")[0];
+  const greeting = getGreeting();
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="relative h-full">
+      {/* Trigger: corner box with 2-line greeting */}
       <button
         onClick={() => setOpen((v) => !v)}
         aria-label="Akun"
-        className="rounded-full bg-terracotta/10 px-3 py-1.5 text-sm font-medium text-terracotta transition hover:bg-terracotta/20"
+        className="group flex h-full flex-col items-start justify-center gap-0.5 border-l border-brown/20 bg-cream px-5 transition-all duration-200 hover:bg-terracotta/10"
       >
-        Halo kak, {displayName}
+        <span className="text-[10px] leading-none text-ink/50 transition-colors duration-200 group-hover:text-terracotta/70">
+          {greeting} kak,
+        </span>
+        <span className="text-sm font-semibold leading-none text-ink transition-colors duration-200 group-hover:text-terracotta">
+          {displayName}
+        </span>
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 w-56 rounded-2xl border border-brown/15 bg-cream p-3 text-left shadow-lg">
+        <div className="absolute right-0 top-full mt-1 w-56 rounded-2xl border border-brown/15 bg-cream p-3 text-left shadow-lg">
           <p className="truncate px-2 text-sm font-medium text-ink">
             {displayName}
           </p>

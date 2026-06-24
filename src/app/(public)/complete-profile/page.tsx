@@ -6,6 +6,13 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { eloquia } from "@/lib/fonts";
+import {
+  validateName,
+  validatePhone,
+  sanitizeName,
+  sanitizePhone,
+} from "@/lib/validation";
+import Spinner from "@/components/Spinner";
 
 const inputClass =
   "w-full rounded-xl border border-brown/20 px-4 py-2.5 text-sm text-ink outline-none transition focus:border-terracotta focus:ring-2 focus:ring-terracotta/15";
@@ -30,10 +37,18 @@ function CompleteProfileContent() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (!nickname.trim() || !phone.trim()) {
-      setError("Semua field wajib diisi.");
+
+    const nameError = validateName(nickname);
+    if (nameError) {
+      setError(nameError);
       return;
     }
+    const phoneError = validatePhone(phone);
+    if (phoneError) {
+      setError(phoneError);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch("/api/profile", {
@@ -90,7 +105,7 @@ function CompleteProfileContent() {
                 id="nickname"
                 type="text"
                 value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
+                onChange={(e) => setNickname(sanitizeName(e.target.value))}
                 placeholder="Panggil aku..."
                 className={inputClass}
                 required
@@ -106,8 +121,9 @@ function CompleteProfileContent() {
               <input
                 id="phone"
                 type="tel"
+                inputMode="numeric"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => setPhone(sanitizePhone(e.target.value))}
                 placeholder="08xxxxxxxxxx"
                 className={inputClass}
                 required
@@ -119,8 +135,9 @@ function CompleteProfileContent() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-full bg-terracotta py-3 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-terracotta py-3 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-60"
             >
+              {loading && <Spinner className="h-4 w-4" />}
               {loading ? "Menyimpan..." : "Simpan & Lanjutkan"}
             </button>
           </form>

@@ -4,6 +4,10 @@ import { FaWhatsapp } from "react-icons/fa";
 import ProductShowcase from "@/components/Product/ProductShowcase";
 import { waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
+import { prisma } from "@/lib/prisma";
+import type { PriceMap } from "@/lib/prices";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Produk - Sempe Dollar Murni",
@@ -15,7 +19,15 @@ const WHATSAPP_LINK = waLink(
   "Halo Sempe Dollar Murni, saya ingin memesan Sempe."
 );
 
-export default function ProductPage() {
+export default async function ProductPage() {
+  const flavorPrices = await prisma.flavorPrice.findMany({
+    include: { size: true },
+  });
+  const prices: PriceMap = {};
+  for (const fp of flavorPrices) {
+    (prices[fp.flavorId] ??= {})[fp.size.label] = fp.price;
+  }
+
   return (
     <main>
       {/* Banner */}
@@ -79,7 +91,7 @@ export default function ProductPage() {
             </p>
           </div>
 
-          <ProductShowcase />
+          <ProductShowcase prices={prices} />
         </div>
       </section>
 

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/supabase/user";
 import CartView from "@/components/Cart/CartView";
 import { eloquia } from "@/lib/fonts";
+import { prisma } from "@/lib/prisma";
+import type { PriceMap } from "@/lib/prices";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +17,14 @@ export const metadata: Metadata = {
 export default async function CartPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/cart");
+
+  const flavorPrices = await prisma.flavorPrice.findMany({
+    include: { size: true },
+  });
+  const prices: PriceMap = {};
+  for (const fp of flavorPrices) {
+    (prices[fp.flavorId] ??= {})[fp.size.label] = fp.price;
+  }
 
   return (
     <main>
@@ -36,7 +46,7 @@ export default async function CartPage() {
 
       <section className="bg-cream-soft py-12">
         <div className="mx-auto max-w-5xl px-6">
-          <CartView />
+          <CartView prices={prices} />
         </div>
       </section>
     </main>

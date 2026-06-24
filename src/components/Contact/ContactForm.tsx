@@ -3,15 +3,32 @@
 import { useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { waLink } from "@/lib/contact";
+import {
+  validateName,
+  validatePhone,
+  validateMessage,
+  sanitizeName,
+  sanitizePhone,
+} from "@/lib/validation";
 
 export default function ContactForm() {
   const [nama, setNama] = useState("");
   const [telepon, setTelepon] = useState("");
   const [pesan, setPesan] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const message = `Halo Sempe Dollar Murni,\n\nNama: ${nama}\nNo. Telepon: ${telepon}\n\n${pesan}`;
+    setError(null);
+
+    const nameError = validateName(nama);
+    if (nameError) return setError(nameError);
+    const phoneError = validatePhone(telepon);
+    if (phoneError) return setError(phoneError);
+    const msgError = validateMessage(pesan);
+    if (msgError) return setError(msgError);
+
+    const message = `Halo Sempe Dollar Murni,\n\nNama: ${nama.trim()}\nNo. Telepon: ${telepon.trim()}\n\n${pesan.trim()}`;
     window.open(waLink(message), "_blank", "noopener,noreferrer");
   }
 
@@ -19,7 +36,7 @@ export default function ContactForm() {
     "w-full rounded-xl border border-brown/20 px-4 py-3 text-sm outline-none transition focus:border-terracotta focus:ring-2 focus:ring-terracotta/15";
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} noValidate className="space-y-5">
       <div>
         <label htmlFor="nama" className="mb-2 block text-sm font-medium">
           Nama
@@ -27,9 +44,8 @@ export default function ContactForm() {
         <input
           id="nama"
           type="text"
-          required
           value={nama}
-          onChange={(e) => setNama(e.target.value)}
+          onChange={(e) => setNama(sanitizeName(e.target.value))}
           placeholder="Nama lengkap Anda"
           className={inputClass}
         />
@@ -42,9 +58,9 @@ export default function ContactForm() {
         <input
           id="telepon"
           type="tel"
-          required
+          inputMode="numeric"
           value={telepon}
-          onChange={(e) => setTelepon(e.target.value)}
+          onChange={(e) => setTelepon(sanitizePhone(e.target.value))}
           placeholder="08xxxxxxxxxx"
           className={inputClass}
         />
@@ -56,7 +72,6 @@ export default function ContactForm() {
         </label>
         <textarea
           id="pesan"
-          required
           rows={5}
           value={pesan}
           onChange={(e) => setPesan(e.target.value)}
@@ -64,6 +79,8 @@ export default function ContactForm() {
           className={`${inputClass} resize-none`}
         />
       </div>
+
+      {error && <p className="text-sm text-terracotta">{error}</p>}
 
       <button
         type="submit"

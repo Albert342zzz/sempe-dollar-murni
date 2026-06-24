@@ -6,12 +6,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FaWhatsapp } from "react-icons/fa";
 import { FiShoppingBag } from "react-icons/fi";
-import { flavors, sizes, getPrice, formatRupiah } from "@/lib/flavors";
+import { flavors, sizes, formatRupiah } from "@/lib/flavors";
+import { priceFor, type PriceMap } from "@/lib/prices";
 import { waLink } from "@/lib/contact";
 import { useCart } from "@/context/CartContext";
 import { createClient } from "@/lib/supabase/client";
 
-export default function ProductShowcase() {
+export default function ProductShowcase({ prices }: { prices: PriceMap }) {
   const router = useRouter();
   const [active, setActive] = useState(0);
   const [size, setSize] = useState(sizes[0]);
@@ -19,6 +20,7 @@ export default function ProductShowcase() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
   const { addItem } = useCart();
   const flavor = flavors[active];
+  const price = priceFor(prices, flavor.id, size);
 
   useEffect(() => {
     const supabase = createClient();
@@ -31,33 +33,18 @@ export default function ProductShowcase() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  function requireLogin(action: () => void) {
+  // Cart is a logged-in feature (allows selecting multiple flavors).
+  function handleAdd() {
     if (!isLoggedIn) {
       router.push("/login?next=/product");
       return;
     }
-    action();
+    addItem(flavor.id, size, 1);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   }
 
-  function handleAdd() {
-    requireLogin(() => {
-      addItem(flavor.id, size, 1);
-      setAdded(true);
-      setTimeout(() => setAdded(false), 2000);
-    });
-  }
-
-  function handleWhatsApp() {
-    requireLogin(() => {
-      window.open(
-        waLink(
-          `Halo Sempe Dollar Murni, saya ingin memesan Sempe rasa ${flavor.name} ukuran ${size}.`
-        ),
-        "_blank",
-        "noopener,noreferrer"
-      );
-    });
-  }
+  const waMessage = `Halo Sempe Dollar Murni, saya ingin memesan Sempe rasa ${flavor.name} ukuran ${size} (${formatRupiah(price)}).`;
 
   return (
     <div>
@@ -96,7 +83,7 @@ export default function ProductShowcase() {
           </p>
 
           <p className="mt-4 text-2xl font-semibold text-ink">
-            {formatRupiah(getPrice(size))}
+            {formatRupiah(price)}
           </p>
 
           <div className="mt-5">
@@ -130,13 +117,15 @@ export default function ProductShowcase() {
               Tambah ke Keranjang
             </button>
 
-            <button
-              onClick={handleWhatsApp}
+            <a
+              href={waLink(waMessage)}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown"
             >
               <FaWhatsapp className="text-base" />
-              Pesan rasa ini
-            </button>
+              Pesan via WhatsApp
+            </a>
 
             {added && (
               <span className="text-sm font-medium text-olive">
@@ -147,13 +136,15 @@ export default function ProductShowcase() {
 
           {isLoggedIn === false && (
             <p className="mt-3 text-sm text-ink/50">
+              Bisa langsung pesan via WhatsApp tanpa login. Mau pilih banyak
+              rasa sekaligus?{" "}
               <Link
                 href="/login?next=/product"
                 className="text-terracotta hover:underline"
               >
                 Login dulu
               </Link>{" "}
-              untuk bisa memesan.
+              untuk pakai keranjang.
             </p>
           )}
         </div>

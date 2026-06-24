@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { prisma } from "@/lib/prisma";
+import { validateName, validatePhone } from "@/lib/validation";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -23,13 +24,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Body harus JSON." }, { status: 400 });
   }
 
-  const { nickname, phone } = body;
-  if (!nickname?.trim() || !phone?.trim()) {
-    return NextResponse.json(
-      { error: "Nama panggilan dan nomor HP wajib diisi." },
-      { status: 400 }
-    );
-  }
+  const nickname = (body.nickname ?? "").trim();
+  const phone = (body.phone ?? "").trim();
+  const nameError = validateName(nickname);
+  if (nameError) return NextResponse.json({ error: nameError }, { status: 400 });
+  const phoneError = validatePhone(phone);
+  if (phoneError)
+    return NextResponse.json({ error: phoneError }, { status: 400 });
 
   const email = user.email ?? "";
 
@@ -39,14 +40,14 @@ export async function POST(req: Request) {
     create: {
       userId: user.id,
       email,
-      nickname: nickname.trim(),
-      phone: phone.trim(),
+      nickname,
+      phone,
       role: "USER",
     },
     update: {
       email,
-      nickname: nickname.trim(),
-      phone: phone.trim(),
+      nickname,
+      phone,
     },
   });
 

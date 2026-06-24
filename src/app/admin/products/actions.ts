@@ -6,18 +6,18 @@ import { isAdmin } from "@/lib/require-admin";
 
 export type ActionState = { ok: boolean; error?: string };
 
-export async function updatePrices(
+export async function updateFlavorPrices(
   _prev: ActionState,
   formData: FormData
 ): Promise<ActionState> {
   if (!(await isAdmin())) return { ok: false, error: "Tidak diizinkan." };
 
-  const sizes = await prisma.size.findMany();
-  for (const s of sizes) {
-    const price = Number(formData.get(`price_${s.id}`));
+  const flavorPrices = await prisma.flavorPrice.findMany();
+  for (const fp of flavorPrices) {
+    const price = Number(formData.get(`price_${fp.flavorId}_${fp.sizeId}`));
     if (Number.isFinite(price) && price >= 0) {
-      await prisma.size.update({
-        where: { id: s.id },
+      await prisma.flavorPrice.update({
+        where: { id: fp.id },
         data: { price: Math.round(price) },
       });
     }
@@ -55,6 +55,12 @@ export async function createFlavor(
 
   await prisma.flavor.create({
     data: { id, name, description, accent, image },
+  });
+
+  // Seed initial prices for every size (uses each size's default price).
+  const sizes = await prisma.size.findMany();
+  await prisma.flavorPrice.createMany({
+    data: sizes.map((s) => ({ flavorId: id, sizeId: s.id, price: s.price })),
   });
 
   revalidatePath("/admin/products");

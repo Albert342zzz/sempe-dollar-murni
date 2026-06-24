@@ -7,11 +7,12 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "pnpm tsx prisma/seed.ts",
   },
   datasource: {
-    // Migrasi & CLI (migrate, studio, db pull) memakai koneksi LANGSUNG
-    // Supabase (port 5432). Runtime aplikasi memakai koneksi pooled
-    // (DATABASE_URL) lewat driver adapter di src/lib/prisma.ts.
+    // Migrations and CLI tools use a direct Supabase connection (port 5432).
+    // The runtime app uses a pooled connection (DATABASE_URL) via the adapter
+    // in src/lib/prisma.ts.
     url: process.env["DIRECT_URL"],
   },
 });
