@@ -31,13 +31,6 @@ type CartContextValue = {
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "sdm-cart";
 
-// Item dummy yang muncul saat keranjang pertama kali dibuka.
-const INITIAL_ITEMS: CartItem[] = [
-  { flavorId: "original", size: "500gr", qty: 2 },
-  { flavorId: "keju", size: "250gr", qty: 1 },
-  { flavorId: "cokelat", size: "1kg", qty: 1 },
-];
-
 const sameLine = (i: CartItem, flavorId: string, size: string) =>
   i.flavorId === flavorId && i.size === size;
 
@@ -45,18 +38,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
-  // Muat keranjang dari localStorage sekali saat mount.
-  // Kunjungan pertama (belum ada data) diisi item dummy.
+  // Load the cart from localStorage once on mount.
   useEffect(() => {
-    let next: CartItem[] = INITIAL_ITEMS;
+    let next: CartItem[] = [];
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw !== null) next = JSON.parse(raw);
     } catch {
-      next = INITIAL_ITEMS;
+      next = [];
     }
-    // setState sekali saat mount memang disengaja: data localStorage dimuat
-    // setelah render pertama agar cocok dengan hasil SSR (aman untuk hydration).
+    // setState inside this effect is intentional: localStorage is read after the
+    // first render so the initial HTML matches the SSR output (hydration-safe).
     /* eslint-disable react-hooks/set-state-in-effect */
     setItems(next);
     setHydrated(true);

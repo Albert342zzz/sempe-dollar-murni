@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 import { FaWhatsapp } from "react-icons/fa";
 import {
   FiTrash2,
@@ -99,6 +100,32 @@ export default function CartView() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successOrder, setSuccessOrder] = useState<CreatedOrder | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // Auto-fill from profile (nickname + phone) or Google name fallback.
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data.user;
+      if (!u) return;
+      setUserEmail(u.email ?? null);
+
+      fetch("/api/profile")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((profile) => {
+          if (profile?.nickname) setCustomerName((prev) => prev || profile.nickname);
+          if (profile?.phone) setPhone((prev) => prev || profile.phone);
+          if (!profile?.nickname) {
+            const name =
+              (u.user_metadata?.full_name as string) ||
+              (u.user_metadata?.name as string) ||
+              "";
+            if (name) setCustomerName((prev) => prev || name);
+          }
+        })
+        .catch(() => {});
+    });
+  }, []);
 
   async function handleCheckout() {
     setError(null);
@@ -359,6 +386,9 @@ export default function CartView() {
 
         {/* Data pemesan */}
         <div className="mt-6 space-y-3 border-t border-brown/10 pt-6">
+          {userEmail && (
+            <p className="text-xs text-ink/50">Masuk sebagai {userEmail}</p>
+          )}
           <div>
             <label htmlFor="nama" className="mb-1.5 block text-sm font-medium">
               Nama

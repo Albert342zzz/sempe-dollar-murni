@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUser } from "@/lib/supabase/user";
 
-// GET /api/orders — daftar pesanan (untuk dashboard admin).
+// GET /api/orders — list all orders (used by the admin dashboard).
 export async function GET() {
   const orders = await prisma.order.findMany({
     include: { items: true },
@@ -13,7 +14,7 @@ export async function GET() {
 
 type OrderItemInput = { flavorId: string; sizeLabel: string; qty: number };
 
-// POST /api/orders — buat pesanan baru (checkout dari keranjang).
+// POST /api/orders — create a new order from the cart checkout.
 export async function POST(req: Request) {
   let body: {
     customerName?: string;
@@ -36,7 +37,7 @@ export async function POST(req: Request) {
     );
   }
 
-  // Ambil harga dari database (jangan percaya harga dari klien).
+  // Resolve prices from the DB — never trust prices sent by the client.
   const sizes = await prisma.size.findMany();
   const priceByLabel = new Map(sizes.map((s) => [s.label, s.price]));
 
@@ -52,10 +53,13 @@ export async function POST(req: Request) {
     };
   });
 
+  const user = await getCurrentUser();
+
   const order = await prisma.order.create({
     data: {
       customerName,
       phone,
+      userId: user?.id ?? null,
       total,
       items: { create: itemsData },
     },

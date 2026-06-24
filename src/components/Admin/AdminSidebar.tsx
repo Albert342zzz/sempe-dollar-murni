@@ -6,6 +6,7 @@ import {
   FiGrid,
   FiBox,
   FiShoppingBag,
+  FiUsers,
   FiArrowLeft,
   FiLogOut,
 } from "react-icons/fi";
@@ -15,13 +16,14 @@ const nav = [
   { icon: FiGrid, label: "Dashboard", href: "/admin" },
   { icon: FiBox, label: "Produk", href: "/admin/products" },
   { icon: FiShoppingBag, label: "Pesanan", href: "/admin/orders" },
+  { icon: FiUsers, label: "Pengguna", href: "/admin/users" },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-64 shrink-0 flex-col bg-ink text-cream/70 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-ink text-cream/70 md:flex">
       <div className="p-6">
         <p className={`${eloquia.className} text-xl text-cream`}>Sempe Dollar</p>
         <p className="text-xs text-cream/50">Panel Admin</p>
