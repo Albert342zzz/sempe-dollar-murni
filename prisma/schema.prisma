@@ -87,3 +87,35 @@ model UserProfile {
   role      UserRole @default(USER)
   createdAt DateTime @default(now())
 }
+
+// Sales report for one period (month/year), uploaded as Excel by admin.
+// Figures are calculated deterministically by code (not AI); aiSummary is narrative only.
+model SalesReport {
+  id          Int           @id @default(autoincrement())
+  filename    String
+  uploadedAt  DateTime      @default(now())
+  periodMonth Int // 1-12, selected by admin on upload
+  periodYear  Int
+  totalAmount Int // total sales (IDR)
+  totalQty    Int
+  validRows   Int // successfully parsed rows
+  skippedRows Int // rows that could not be parsed (ideally 0)
+  aiSummary   String? // narrative summary (Gemini or template fallback)
+  records     SalesRecord[]
+
+  @@index([periodYear, periodMonth])
+}
+
+// One sales row: flavor + size + quantity.
+model SalesRecord {
+  id        Int         @id @default(autoincrement())
+  report    SalesReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  reportId  Int
+  flavor    String // flavor label (e.g. "Keju") or raw code if unrecognized
+  size      String // size label (e.g. "350gr")
+  qty       Int
+  unitPrice Int
+  amount    Int
+
+  @@index([reportId])
+}

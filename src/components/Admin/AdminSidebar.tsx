@@ -7,6 +7,7 @@ import {
   FiBox,
   FiShoppingBag,
   FiUsers,
+  FiFileText,
   FiArrowLeft,
   FiLogOut,
   FiX,
@@ -17,6 +18,7 @@ const nav = [
   { icon: FiGrid, label: "Dashboard", href: "/admin" },
   { icon: FiBox, label: "Produk", href: "/admin/products" },
   { icon: FiShoppingBag, label: "Pesanan", href: "/admin/orders" },
+  { icon: FiFileText, label: "Laporan", href: "/admin/reports" },
   { icon: FiUsers, label: "Pengguna", href: "/admin/users" },
 ];
 

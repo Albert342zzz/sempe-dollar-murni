@@ -81,6 +81,8 @@ export default function UserMenu() {
   async function logout() {
     const supabase = createClient();
     await supabase.auth.signOut();
+    // Also clear admin JWT cookie so /admin is no longer accessible.
+    await fetch("/api/admin/logout").catch(() => {});
     setUser(null);
     setNickname(null);
     setIsAdmin(false);

@@ -54,8 +54,8 @@ const DEFAULT_IMAGE = "/images/product3.png";
 
 export const flavors: Flavor[] = [
   {
-    id: "original",
-    name: "Original",
+    id: "wijen",
+    name: "Wijen",
     description:
       "Rasa original khas Sempe dengan taburan wijen yang gurih dan renyah.",
     accent: "#C9A227",
