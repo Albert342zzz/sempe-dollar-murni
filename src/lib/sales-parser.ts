@@ -46,6 +46,7 @@ export type SalesAggregates = {
 export type ParseResult = {
   records: ParsedRecord[];
   aggregates: SalesAggregates;
+  skippedRowNumbers: number[]; // Excel row numbers that were skipped
 };
 
 // Parse a cell value to number; handles Indonesian number format ("15.000", "Rp 15.000").
@@ -54,6 +55,19 @@ function toNumber(value: unknown): number {
   if (value == null) return 0;
   const digits = String(value).replace(/[^\d]/g, "");
   return digits ? parseInt(digits, 10) : 0;
+}
+
+// Convert a cell to text. Excel often coerces the "1/2" header into a date
+// (e.g. Feb 1); turn it back into "d/m" (or "m/d") so it matches a size code.
+function cellText(value: unknown): string {
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    const dm = `${value.getDate()}/${value.getMonth() + 1}`;
+    const md = `${value.getMonth() + 1}/${value.getDate()}`;
+    if (lookupSize(dm)) return dm;
+    if (lookupSize(md)) return md;
+    return dm;
+  }
+  return String(value ?? "").trim();
 }
 
 type Layout = {
@@ -73,7 +87,7 @@ function detectLayout(rows: unknown[][]): Layout | null {
   for (let r = 0; r < scan; r++) {
     const row = rows[r] ?? [];
     let count = 0;
-    for (const cell of row) if (lookupSize(cell)) count++;
+    for (const cell of row) if (lookupSize(cellText(cell))) count++;
     if (count > bestCount) {
       bestCount = count;
       sizeHeaderRow = r;
@@ -83,9 +97,9 @@ function detectLayout(rows: unknown[][]): Layout | null {
 
   const sizeCols: { col: number; label: string }[] = [];
   (rows[sizeHeaderRow] ?? []).forEach((cell, c) => {
-    const text = String(cell ?? "").trim();
+    const text = cellText(cell);
     if (text !== "") {
-      sizeCols.push({ col: c, label: lookupSize(cell)?.label ?? text });
+      sizeCols.push({ col: c, label: lookupSize(text)?.label ?? text });
     }
   });
 
@@ -107,10 +121,11 @@ function detectLayout(rows: unknown[][]): Layout | null {
 export function parseSalesWorkbook(buffer: ArrayBuffer): ParseResult {
   const wb = XLSX.read(buffer, { type: "array", cellDates: true });
   const sheet = wb.Sheets[wb.SheetNames[0]];
+  // blankrows:true keeps array index aligned with the Excel row number (index + 1).
   const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, {
     header: 1,
     raw: true,
-    blankrows: false,
+    blankrows: true,
   });
 
   const layout = detectLayout(rows);
@@ -122,15 +137,25 @@ export function parseSalesWorkbook(buffer: ArrayBuffer): ParseResult {
 
   const { sizeHeaderRow, flavorCol, priceCol, sizeCols } = layout;
   const records: ParsedRecord[] = [];
-  let skippedRows = 0;
+  const skippedRowNumbers: number[] = [];
 
   for (let r = sizeHeaderRow + 1; r < rows.length; r++) {
     const row = rows[r] ?? [];
     if (row.every((c) => c == null || String(c).trim() === "")) continue;
 
-    const flavorRaw = row[flavorCol];
-    const flavor =
-      lookupFlavor(flavorRaw)?.label ?? String(flavorRaw ?? "").trim();
+    const excelRow = r + 1; // array index = Excel row number - 1
+
+    // A sales row MUST have a flavor. Rows without one (e.g. TOTAL/summary rows
+    // that only sum the size columns) are skipped — per-size totals are already
+    // computed separately in bySize.
+    const flavorText = cellText(row[flavorCol]);
+    if (flavorText === "") {
+      const hasQty = sizeCols.some(({ col }) => toNumber(row[col]) > 0);
+      if (hasQty) skippedRowNumbers.push(excelRow);
+      continue;
+    }
+
+    const flavor = lookupFlavor(flavorText)?.label ?? flavorText;
     const unitPrice = priceCol !== -1 ? toNumber(row[priceCol]) : 0;
 
     let emitted = 0;
@@ -148,11 +173,15 @@ export function parseSalesWorkbook(buffer: ArrayBuffer): ParseResult {
       }
     }
 
-    // Row has a flavor but no qty in any size column — count as skipped.
-    if (emitted === 0 && flavor !== "") skippedRows++;
+    // Flavor present but no size qty — incomplete row.
+    if (emitted === 0) skippedRowNumbers.push(excelRow);
   }
 
-  return { records, aggregates: aggregate(records, skippedRows) };
+  return {
+    records,
+    skippedRowNumbers,
+    aggregates: aggregate(records, skippedRowNumbers.length),
+  };
 }
 
 function addTo(map: Map<string, Breakdown>, label: string, qty: number, amount: number) {

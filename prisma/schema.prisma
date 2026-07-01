@@ -91,17 +91,18 @@ model UserProfile {
 // Sales report for one period (month/year), uploaded as Excel by admin.
 // Figures are calculated deterministically by code (not AI); aiSummary is narrative only.
 model SalesReport {
-  id          Int           @id @default(autoincrement())
-  filename    String
-  uploadedAt  DateTime      @default(now())
-  periodMonth Int // 1-12, selected by admin on upload
-  periodYear  Int
-  totalAmount Int // total sales (IDR)
-  totalQty    Int
-  validRows   Int // successfully parsed rows
-  skippedRows Int // rows that could not be parsed (ideally 0)
-  aiSummary   String? // narrative summary (Gemini or template fallback)
-  records     SalesRecord[]
+  id             Int           @id @default(autoincrement())
+  filename       String
+  uploadedAt     DateTime      @default(now())
+  periodMonth    Int // 1-12, selected by admin on upload
+  periodYear     Int
+  totalAmount    Int // total sales (IDR)
+  totalQty       Int
+  validRows      Int // successfully parsed sales rows
+  skippedRows    Int // skipped rows (TOTAL/summary or incomplete)
+  skippedRowNums Int[] // Excel row numbers that were skipped
+  aiSummary      String? // narrative summary (Gemini or template fallback)
+  records        SalesRecord[]
 
   @@index([periodYear, periodMonth])
 }

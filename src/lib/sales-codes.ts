@@ -54,7 +54,3 @@ export function lookupFlavor(raw: unknown): CodeDef | undefined {
   const key = normalize(raw);
   return key ? flavorByCode.get(key) : undefined;
 }
-
-export function isBusinessRow(sizeRaw: unknown): boolean {
-  return lookupSize(sizeRaw) !== undefined;
-}
