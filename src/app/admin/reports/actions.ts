@@ -49,7 +49,7 @@ export async function uploadReport(formData: FormData): Promise<UploadState> {
     };
   }
 
-  const { records, aggregates: a } = parsed;
+  const { records, aggregates: a, skippedRowNumbers } = parsed;
   if (records.length === 0) {
     return {
       ok: false,
@@ -68,6 +68,7 @@ export async function uploadReport(formData: FormData): Promise<UploadState> {
       totalQty: a.totalQty,
       validRows: a.validRows,
       skippedRows: a.skippedRows,
+      skippedRowNums: skippedRowNumbers,
       aiSummary: summary,
       records: {
         create: records.map((r) => ({

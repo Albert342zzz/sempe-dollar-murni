@@ -141,8 +141,18 @@ export default async function ReportDetailPage({
         </div>
         {report.skippedRows > 0 && (
           <p className="mt-3 text-xs text-ink/40">
-            {report.skippedRows} baris tidak terbaca (kosong / tanpa data rasa &
-            ukuran).
+            {report.skippedRows} baris total/rekap
+            {report.skippedRowNums.length > 0 && (
+              <>
+                {" "}(baris Excel ke{" "}
+                <span className="font-medium text-ink/60">
+                  {report.skippedRowNums.join(", ")}
+                </span>
+                ){" "}
+              </>
+            )}{" "}
+            diabaikan otomatis — total sudah dihitung ulang dari data penjualan,
+            jadi tidak dobel.
           </p>
         )}
       </div>
