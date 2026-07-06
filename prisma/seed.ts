@@ -1,10 +1,47 @@
 import "dotenv/config";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { flavors, sizes, priceBySize } from "../src/lib/flavors";
+import { galleryItems } from "../src/lib/gallery";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
+
+const MIME: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+};
+
+// Fill the GalleryImage table from files in /public if it is still empty.
+async function seedGallery() {
+  const count = await prisma.galleryImage.count();
+  if (count > 0) {
+    console.log(`Gallery already seeded (${count} images), skipped.`);
+    return;
+  }
+
+  let order = 0;
+  for (const item of galleryItems) {
+    const ext = path.extname(item.src).toLowerCase();
+    const mimeType = MIME[ext];
+    if (!mimeType) continue;
+    try {
+      const filePath = path.join(process.cwd(), "public", item.src);
+      const data = new Uint8Array(await readFile(filePath));
+      await prisma.galleryImage.create({
+        data: { data, mimeType, alt: item.alt, sortOrder: order++ },
+      });
+    } catch (e) {
+      console.warn(`Skip gallery image ${item.src}:`, (e as Error).message);
+    }
+  }
+  console.log(`Seeded ${order} gallery images.`);
+}
 
 // Seeds the database with flavors, sizes, and initial per-flavor prices from lib/flavors.ts.
 async function main() {
@@ -50,6 +87,8 @@ async function main() {
       });
     }
   }
+
+  await seedGallery();
 
   console.log(`Seed done: ${flavors.length} flavors, ${sizes.length} sizes.`);
 }

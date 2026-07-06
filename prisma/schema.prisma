@@ -120,3 +120,17 @@ model SalesRecord {
 
   @@index([reportId])
 }
+
+// Admin-managed gallery photos. Image bytes are stored directly in the DB
+// (Bytes) and served via /api/gallery/[id].
+model GalleryImage {
+  id        Int      @id @default(autoincrement())
+  data      Bytes
+  mimeType  String
+  alt       String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+}

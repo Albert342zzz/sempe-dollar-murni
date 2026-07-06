@@ -3,9 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { galleryItems } from "@/lib/gallery";
+import type { GalleryItem } from "@/lib/gallery";
 
-export default function GalleryGrid() {
+export default function GalleryGrid({
+  items: galleryItems,
+}: {
+  items: GalleryItem[];
+}) {
   const [index, setIndex] = useState<number | null>(null);
   const isOpen = index !== null;
 
@@ -15,11 +19,11 @@ export default function GalleryGrid() {
       setIndex((i) =>
         i === null ? i : (i - 1 + galleryItems.length) % galleryItems.length
       ),
-    []
+    [galleryItems.length]
   );
   const next = useCallback(
     () => setIndex((i) => (i === null ? i : (i + 1) % galleryItems.length)),
-    []
+    [galleryItems.length]
   );
 
   useEffect(() => {
