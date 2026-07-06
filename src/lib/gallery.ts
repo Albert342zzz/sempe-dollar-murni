@@ -3,7 +3,16 @@ export type GalleryItem = {
   alt: string;
 };
 
-// Ganti / tambahkan dengan foto produk dan dokumentasi asli perusahaan.
+// URL for a DB-backed gallery image. `v` (updatedAt) forces a refresh when the photo changes.
+export function galleryImageUrl(id: number, updatedAt: Date | string): string {
+  const v =
+    typeof updatedAt === "string"
+      ? new Date(updatedAt).getTime()
+      : updatedAt.getTime();
+  return `/api/gallery/${id}?v=${v}`;
+}
+
+// Fallback photos shown when the gallery table is empty; also used to seed it.
 export const galleryItems: GalleryItem[] = [
   { src: "/images/slider/1.jpg", alt: "Suasana produksi kue kering" },
   { src: "/images/product3.png", alt: "Aneka kue kering Sempe Dollar Murni" },

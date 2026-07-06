@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import GalleryGrid from "@/components/Gallery/GalleryGrid";
 import { eloquia } from "@/lib/fonts";
+import { prisma } from "@/lib/prisma";
+import { galleryImageUrl, galleryItems as fallbackItems } from "@/lib/gallery";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Galeri - Sempe Dollar Murni",
@@ -9,7 +13,18 @@ export const metadata: Metadata = {
     "Galeri foto produk dan dokumentasi Sempe Dollar Murni, UMKM kue kering asal Temanggung.",
 };
 
-export default function GalleryPage() {
+export default async function GalleryPage() {
+  const images = await prisma.galleryImage.findMany({
+    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
+  });
+  const items =
+    images.length > 0
+      ? images.map((img) => ({
+          src: galleryImageUrl(img.id, img.updatedAt),
+          alt: img.alt,
+        }))
+      : fallbackItems;
+
   return (
     <main>
       {/* Banner */}
@@ -39,10 +54,10 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      {/* Grid Galeri */}
+      {/* Gallery grid */}
       <section className="bg-cream py-16">
         <div className="mx-auto max-w-6xl px-6">
-          <GalleryGrid />
+          <GalleryGrid items={items} />
         </div>
       </section>
     </main>
