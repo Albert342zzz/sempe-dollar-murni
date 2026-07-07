@@ -48,7 +48,7 @@ export default function GalleryGrid({
           <button
             key={`${item.src}-${i}`}
             onClick={() => setIndex(i)}
-            className="group relative aspect-square overflow-hidden rounded-2xl"
+            className="group relative aspect-square overflow-hidden rounded-2xl text-left"
           >
             <Image
               src={item.src}
@@ -57,7 +57,14 @@ export default function GalleryGrid({
               sizes="(max-width: 768px) 50vw, 33vw"
               className="object-cover transition duration-500 group-hover:scale-110"
             />
-            <div className="absolute inset-0 bg-black/0 transition group-hover:bg-black/20" />
+
+            {/* Overlay + caption appear on hover */}
+            <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            {item.alt && (
+              <p className="absolute inset-x-0 bottom-0 translate-y-2 p-4 text-sm font-medium text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+                {item.alt}
+              </p>
+            )}
           </button>
         ))}
       </div>

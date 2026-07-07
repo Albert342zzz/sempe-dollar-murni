@@ -3,57 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/require-admin";
+import { readImageFile } from "@/lib/gallery-upload";
 
 export type GalleryState = { ok: boolean; error?: string };
-
-const MAX_BYTES = 3 * 1024 * 1024; // 3 MB
-const ALLOWED = /^image\/(jpeg|png|webp|gif)$/;
-
-async function readImage(
-  file: unknown
-): Promise<{ data: Uint8Array<ArrayBuffer>; mimeType: string } | { error: string }> {
-  if (!(file instanceof File) || file.size === 0) {
-    return { error: "File tidak ditemukan." };
-  }
-  if (!ALLOWED.test(file.type)) {
-    return { error: "Format harus JPG, PNG, WEBP, atau GIF." };
-  }
-  if (file.size > MAX_BYTES) {
-    return { error: "Ukuran gambar maksimal 3 MB." };
-  }
-  const data = new Uint8Array(await file.arrayBuffer());
-  return { data, mimeType: file.type };
-}
 
 function revalidate() {
   revalidatePath("/admin/gallery");
   revalidatePath("/gallery");
-}
-
-// Add a new photo to the gallery.
-export async function addGalleryImage(formData: FormData): Promise<GalleryState> {
-  if (!(await isAdmin())) return { ok: false, error: "Tidak diizinkan." };
-
-  const img = await readImage(formData.get("file"));
-  if ("error" in img) return { ok: false, error: img.error };
-
-  const alt = String(formData.get("alt") ?? "").trim() || "Foto galeri";
-  const last = await prisma.galleryImage.findFirst({
-    orderBy: { sortOrder: "desc" },
-    select: { sortOrder: true },
-  });
-
-  await prisma.galleryImage.create({
-    data: {
-      data: img.data,
-      mimeType: img.mimeType,
-      alt,
-      sortOrder: (last?.sortOrder ?? -1) + 1,
-    },
-  });
-
-  revalidate();
-  return { ok: true };
 }
 
 // Replace an entry's image (alt text and order stay the same).
@@ -65,7 +21,7 @@ export async function replaceGalleryImage(
   const id = Number(formData.get("id"));
   if (!Number.isInteger(id)) return { ok: false, error: "ID tidak valid." };
 
-  const img = await readImage(formData.get("file"));
+  const img = await readImageFile(formData.get("file"));
   if ("error" in img) return { ok: false, error: img.error };
 
   await prisma.galleryImage.update({
@@ -98,35 +54,28 @@ export async function deleteGalleryImage(id: number): Promise<GalleryState> {
   return { ok: true };
 }
 
-// Reorder a photo (swap sortOrder with its neighbor).
-export async function moveGalleryImage(
-  id: number,
-  dir: "up" | "down"
+// Save the new order (from drag-and-drop) in a SINGLE SQL statement:
+// one round-trip, atomic, and it leaves updatedAt untouched (image cache URLs stay valid).
+export async function reorderGalleryImages(
+  ids: number[]
 ): Promise<GalleryState> {
   if (!(await isAdmin())) return { ok: false, error: "Tidak diizinkan." };
+  const clean = ids.filter((id) => Number.isInteger(id));
+  if (clean.length === 0) return { ok: true };
 
-  const all = await prisma.galleryImage.findMany({
-    orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
-    select: { id: true, sortOrder: true },
-  });
-  const idx = all.findIndex((x) => x.id === id);
-  if (idx === -1) return { ok: false, error: "Foto tidak ditemukan." };
+  // Build: UPDATE ... FROM (VALUES ($1,$2),($3,$4),...) v(id, ord) WHERE g.id = v.id
+  const valuesSql = clean
+    .map((_, i) => `($${i * 2 + 1}::int, $${i * 2 + 2}::int)`)
+    .join(", ");
+  const params = clean.flatMap((id, i) => [id, i]);
 
-  const swapIdx = dir === "up" ? idx - 1 : idx + 1;
-  if (swapIdx < 0 || swapIdx >= all.length) return { ok: true }; // already at the edge
-
-  const a = all[idx];
-  const b = all[swapIdx];
-  await prisma.$transaction([
-    prisma.galleryImage.update({
-      where: { id: a.id },
-      data: { sortOrder: b.sortOrder },
-    }),
-    prisma.galleryImage.update({
-      where: { id: b.id },
-      data: { sortOrder: a.sortOrder },
-    }),
-  ]);
+  await prisma.$executeRawUnsafe(
+    `UPDATE "GalleryImage" AS g
+     SET "sortOrder" = v.ord
+     FROM (VALUES ${valuesSql}) AS v(id, ord)
+     WHERE g.id = v.id`,
+    ...params
+  );
 
   revalidate();
   return { ok: true };
