@@ -4,8 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/require-admin";
 
-type Status = "BARU" | "DIPROSES" | "SELESAI";
-const VALID: Status[] = ["BARU", "DIPROSES", "SELESAI"];
+type Status = "BARU" | "DIPROSES" | "SELESAI" | "DIBATALKAN";
+const VALID: Status[] = ["BARU", "DIPROSES", "SELESAI", "DIBATALKAN"];
 
 export async function updateOrderStatus(
   id: number,

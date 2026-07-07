@@ -159,7 +159,9 @@ export default function MobileMenu({ menuOpen, setMenuOpen }: Props) {
             Menu
           </p>
 
-          {navItems.map((item) => {
+          {navItems
+            .filter((item) => !(isAdmin && item.href === "/cart"))
+            .map((item) => {
             const Icon = item.icon;
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -224,14 +226,16 @@ export default function MobileMenu({ menuOpen, setMenuOpen }: Props) {
                 </Link>
               )}
 
-              <Link
-                href="/my-orders"
-                onClick={close}
-                className="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-cream/60 transition-all duration-200 hover:-translate-x-1 hover:bg-cream/15 hover:text-cream active:scale-95 active:bg-cream/20 active:text-cream"
-              >
-                <FiShoppingBag className="shrink-0 text-base transition-transform duration-200 group-hover:scale-110 group-active:scale-90" />
-                Pesanan Saya
-              </Link>
+              {!isAdmin && (
+                <Link
+                  href="/my-orders"
+                  onClick={close}
+                  className="group flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-cream/60 transition-all duration-200 hover:-translate-x-1 hover:bg-cream/15 hover:text-cream active:scale-95 active:bg-cream/20 active:text-cream"
+                >
+                  <FiShoppingBag className="shrink-0 text-base transition-transform duration-200 group-hover:scale-110 group-active:scale-90" />
+                  Pesanan Saya
+                </Link>
+              )}
 
               <button
                 onClick={logout}
