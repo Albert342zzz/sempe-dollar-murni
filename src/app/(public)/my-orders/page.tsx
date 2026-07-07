@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/supabase/user";
+import { getCurrentUser, isAdminUser } from "@/lib/supabase/user";
 import { prisma } from "@/lib/prisma";
 import { getFlavor, formatRupiah } from "@/lib/flavors";
 import { eloquia } from "@/lib/fonts";
@@ -16,11 +16,13 @@ const statusLabel: Record<string, string> = {
   BARU: "Baru",
   DIPROSES: "Diproses",
   SELESAI: "Selesai",
+  DIBATALKAN: "Dibatalkan",
 };
 const statusStyle: Record<string, string> = {
   BARU: "bg-terracotta/10 text-terracotta",
   DIPROSES: "bg-gold/20 text-[#8a6d0f]",
   SELESAI: "bg-olive/15 text-olive",
+  DIBATALKAN: "bg-red-500/10 text-red-600",
 };
 const dateFmt = new Intl.DateTimeFormat("id-ID", {
   day: "2-digit",
@@ -31,6 +33,9 @@ const dateFmt = new Intl.DateTimeFormat("id-ID", {
 export default async function MyOrdersPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/my-orders");
+
+  // Admins have no customer order history — send them to the admin panel.
+  if (await isAdminUser(user.id)) redirect("/admin");
 
   const orders = await prisma.order.findMany({
     where: { userId: user.id },

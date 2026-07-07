@@ -71,6 +71,7 @@ enum OrderStatus {
   BARU
   DIPROSES
   SELESAI
+  DIBATALKAN
 }
 
 enum UserRole {

@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa";
-import { MdEmail, MdLocationOn, MdAccessTime } from "react-icons/md";
+import {
+  MdEmail,
+  MdLocationOn,
+  MdAccessTime,
+  MdStorefront,
+} from "react-icons/md";
 import ContactForm from "@/components/Contact/ContactForm";
 import { contact, waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
@@ -32,6 +37,22 @@ const info = [
     href: `mailto:${contact.email}`,
   },
   { icon: MdAccessTime, label: "Jam Operasional", value: contact.hours },
+];
+
+// List of retail outlets (placeholder — replace with real data).
+const outlets = [
+  {
+    name: "Toko Oleh-oleh Pak Budi",
+    address: "Jl. Jend. Sudirman No.12, Temanggung, Jawa Tengah",
+  },
+  {
+    name: "Sentra UMKM Kudus",
+    address: "Jl. Sunan Kudus No.45, Kudus, Jawa Tengah",
+  },
+  {
+    name: "Pusat Oleh-oleh Semarang",
+    address: "Jl. Pandanaran No.88, Semarang, Jawa Tengah",
+  },
 ];
 
 export default function ContactPage() {
@@ -165,6 +186,39 @@ export default function ContactPage() {
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Where to find our products */}
+      <section className="bg-cream-soft py-16">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="mb-10 text-center">
+            <h2 className="text-2xl font-semibold md:text-3xl">
+              Temukan Produk Kami di
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-gray-600">
+              Selain lewat WhatsApp, produk kami juga tersedia di beberapa toko
+              rekanan berikut.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {outlets.map((o) => (
+              <div
+                key={o.name}
+                className="rounded-3xl border border-brown/15 bg-cream p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-brown/5"
+              >
+                <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-terracotta/10 text-xl text-terracotta">
+                  <MdStorefront />
+                </span>
+                <h3 className="mt-4 text-lg font-semibold text-ink">{o.name}</h3>
+                <p className="mt-1.5 flex items-start gap-1.5 text-sm text-gray-600">
+                  <MdLocationOn className="mt-0.5 shrink-0 text-terracotta/70" />
+                  <span>{o.address}</span>
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

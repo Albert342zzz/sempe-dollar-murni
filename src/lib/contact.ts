@@ -6,7 +6,7 @@ export const contact = {
   email: "info@sempedollarmurni.com",
   address:
     "Jl. Kartini No.42, Margosari, Kertosari, Kec. Temanggung, Kabupaten Temanggung, Jawa Tengah 56216",
-  hours: "Senin - Minggu, 07.00 - 22.00 WIB",
+  hours: "Setiap Hari, 07.00 - 22.00 WIB",
   instagram: "https://www.instagram.com/sempe_dollar.murni/",
   facebook:
     "https://www.facebook.com/p/SEMPE-Dollar-MURNI-Temanggung-100069792446177/",

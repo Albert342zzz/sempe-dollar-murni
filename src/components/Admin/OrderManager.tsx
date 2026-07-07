@@ -5,7 +5,7 @@ import { updateOrderStatus } from "@/app/admin/orders/actions";
 import { formatRupiah } from "@/lib/flavors";
 import Pagination from "./Pagination";
 
-type Status = "BARU" | "DIPROSES" | "SELESAI";
+type Status = "BARU" | "DIPROSES" | "SELESAI" | "DIBATALKAN";
 
 type Order = {
   id: number;
@@ -17,16 +17,18 @@ type Order = {
   items: { flavorName: string; sizeLabel: string; qty: number }[];
 };
 
-const STATUSES: Status[] = ["BARU", "DIPROSES", "SELESAI"];
+const STATUSES: Status[] = ["BARU", "DIPROSES", "SELESAI", "DIBATALKAN"];
 const statusLabel: Record<Status, string> = {
   BARU: "Baru",
   DIPROSES: "Diproses",
   SELESAI: "Selesai",
+  DIBATALKAN: "Dibatalkan",
 };
 const activeStyle: Record<Status, string> = {
   BARU: "bg-terracotta text-white",
   DIPROSES: "bg-gold text-ink",
   SELESAI: "bg-olive text-white",
+  DIBATALKAN: "bg-red-500 text-white",
 };
 
 const tanggalFmt = new Intl.DateTimeFormat("id-ID", {
@@ -108,6 +110,7 @@ export default function OrderManager({ orders }: { orders: Order[] }) {
     BARU: orders.filter((o) => o.status === "BARU").length,
     DIPROSES: orders.filter((o) => o.status === "DIPROSES").length,
     SELESAI: orders.filter((o) => o.status === "SELESAI").length,
+    DIBATALKAN: orders.filter((o) => o.status === "DIBATALKAN").length,
   };
 
   const filtered =
@@ -125,6 +128,7 @@ export default function OrderManager({ orders }: { orders: Order[] }) {
     { key: "BARU", label: "Baru" },
     { key: "DIPROSES", label: "Diproses" },
     { key: "SELESAI", label: "Selesai" },
+    { key: "DIBATALKAN", label: "Dibatalkan" },
   ];
 
   function changeFilter(key: "ALL" | Status) {

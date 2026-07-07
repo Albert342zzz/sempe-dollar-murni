@@ -144,13 +144,15 @@ export default function UserMenu() {
             </Link>
           )}
 
-          <Link
-            href="/my-orders"
-            onClick={() => setOpen(false)}
-            className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-ink/80 transition hover:bg-cream-soft"
-          >
-            <FiShoppingBag /> Pesanan Saya
-          </Link>
+          {!isAdmin && (
+            <Link
+              href="/my-orders"
+              onClick={() => setOpen(false)}
+              className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-ink/80 transition hover:bg-cream-soft"
+            >
+              <FiShoppingBag /> Pesanan Saya
+            </Link>
+          )}
           <button
             onClick={logout}
             className="flex w-full items-center gap-2 rounded-xl px-2 py-2 text-sm text-ink/80 transition hover:bg-cream-soft"

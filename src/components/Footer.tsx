@@ -9,8 +9,8 @@ import { eloquia } from "@/lib/fonts";
 const menuLinks = [
   { label: "Tentang", href: "/about" },
   { label: "Produk", href: "/product" },
-  { label: "Galeri", href: "/gallery" },
   { label: "Kontak", href: "/contact" },
+  { label: "Galeri", href: "/gallery" },
 ];
 
 const socials = [

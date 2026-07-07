@@ -14,7 +14,7 @@ export default async function AdminOrdersPage() {
     id: o.id,
     customerName: o.customerName,
     phone: o.phone,
-    status: o.status as "BARU" | "DIPROSES" | "SELESAI",
+    status: o.status as "BARU" | "DIPROSES" | "SELESAI" | "DIBATALKAN",
     total: o.total,
     createdAt: o.createdAt.toISOString(),
     items: o.items.map((it) => ({

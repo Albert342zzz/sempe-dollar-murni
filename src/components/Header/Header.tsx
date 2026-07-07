@@ -9,6 +9,7 @@ import MobileMenu from "./MobileMenu";
 import HamburgerButton from "./HamburgerButton";
 import UserMenu from "./UserMenu";
 import { useCart } from "@/context/CartContext";
+import { useIsAdmin } from "@/lib/use-is-admin";
 
 function NavLink({
   href,
@@ -42,6 +43,7 @@ export default function Header() {
   const { totalCount } = useCart();
   const pathname = usePathname();
   const cartActive = pathname === "/cart";
+  const isAdmin = useIsAdmin();
 
   return (
     <>
@@ -69,23 +71,27 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Right nav: Galeri · Cart */}
+          {/* Right nav: Galeri · Cart (cart is hidden for admins) */}
           <nav className="hidden items-center gap-10 md:flex">
             <NavLink href="/gallery">GALERI</NavLink>
-            <Link
-              href="/cart"
-              aria-label="Keranjang Saya"
-              className={`relative text-xl transition-colors duration-200 ${
-                cartActive ? "text-terracotta" : "text-ink hover:text-terracotta"
-              }`}
-            >
-              <BiShoppingBag />
-              {totalCount > 0 && (
-                <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-medium text-white">
-                  {totalCount}
-                </span>
-              )}
-            </Link>
+            {!isAdmin && (
+              <Link
+                href="/cart"
+                aria-label="Keranjang Saya"
+                className={`relative text-xl transition-colors duration-200 ${
+                  cartActive
+                    ? "text-terracotta"
+                    : "text-ink hover:text-terracotta"
+                }`}
+              >
+                <BiShoppingBag />
+                {totalCount > 0 && (
+                  <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-medium text-white">
+                    {totalCount}
+                  </span>
+                )}
+              </Link>
+            )}
           </nav>
         </div>
 

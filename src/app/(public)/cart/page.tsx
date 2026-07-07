@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getCurrentUser } from "@/lib/supabase/user";
+import { getCurrentUser, isAdminUser } from "@/lib/supabase/user";
 import CartView from "@/components/Cart/CartView";
 import { eloquia } from "@/lib/fonts";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +17,9 @@ export const metadata: Metadata = {
 export default async function CartPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/login?next=/cart");
+
+  // Admins have no cart — send them to the admin panel.
+  if (await isAdminUser(user.id)) redirect("/admin");
 
   const flavorPrices = await prisma.flavorPrice.findMany({
     include: { size: true },
