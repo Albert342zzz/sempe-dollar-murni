@@ -3,6 +3,7 @@ import { FiFileText, FiUploadCloud } from "react-icons/fi";
 import { prisma } from "@/lib/prisma";
 import { flavors, formatRupiah } from "@/lib/flavors";
 import { monthLabel } from "@/lib/months";
+import { SizePie, SIZE_PIE_COLORS } from "@/components/Admin/charts/SalesCharts";
 
 // Render on each request to read fresh data from the DB; never prerender at
 // build time (the build has no database connection).
@@ -129,6 +130,32 @@ export default async function AdminDashboard() {
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 6);
 
+  // Sales composition per size (for the pie): top 5 + "Lainnya" (Others).
+  const soldBySize = new Map<string, { qty: number; amount: number }>();
+  for (const r of reports) {
+    for (const rec of r.records) {
+      const cur = soldBySize.get(rec.size) ?? { qty: 0, amount: 0 };
+      cur.qty += rec.qty;
+      cur.amount += rec.amount;
+      soldBySize.set(rec.size, cur);
+    }
+  }
+  const sizeArr = [...soldBySize.entries()]
+    .map(([label, v]) => ({ label, qty: v.qty, amount: v.amount }))
+    .sort((a, b) => b.amount - a.amount);
+  const restSizes = sizeArr.slice(5);
+  const sizeComposition = restSizes.length
+    ? [
+        ...sizeArr.slice(0, 5),
+        {
+          label: "Lainnya",
+          qty: restSizes.reduce((s, x) => s + x.qty, 0),
+          amount: restSizes.reduce((s, x) => s + x.amount, 0),
+        },
+      ]
+    : sizeArr;
+  const totalSizeAmount = sizeComposition.reduce((s, x) => s + x.amount, 0);
+
   // Most recently uploaded reports.
   const recent = [...reports]
     .sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())
@@ -210,6 +237,49 @@ export default async function AdminDashboard() {
               <FlavorBars data={flavorSales} />
             </div>
           </div>
+
+          {/* Sales composition per size (pie chart) */}
+          {sizeComposition.length > 0 && (
+            <div className="mt-6 rounded-2xl border border-brown/15 bg-cream p-6">
+              <h2 className="text-lg font-semibold text-ink">
+                Komposisi Penjualan per Ukuran
+              </h2>
+              <p className="mb-5 text-sm text-ink/50">
+                Porsi nilai penjualan tiap varian berat
+              </p>
+              <div className="grid items-center gap-6 md:grid-cols-2">
+                <SizePie data={sizeComposition} />
+                <ul className="space-y-2.5">
+                  {sizeComposition.map((s, i) => {
+                    const pct = totalSizeAmount
+                      ? Math.round((s.amount / totalSizeAmount) * 100)
+                      : 0;
+                    return (
+                      <li
+                        key={s.label}
+                        className="flex items-center gap-2.5 text-sm"
+                      >
+                        <span
+                          className="h-2.5 w-2.5 shrink-0 rounded-full"
+                          style={{
+                            backgroundColor:
+                              SIZE_PIE_COLORS[i % SIZE_PIE_COLORS.length],
+                          }}
+                        />
+                        <span className="text-ink/80">{s.label}</span>
+                        <span className="ml-auto tabular-nums text-ink/50">
+                          {pct}%
+                        </span>
+                        <span className="w-28 text-right tabular-nums text-ink/70">
+                          {formatRupiah(s.amount)}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Recent reports */}
           <div className="mt-6 rounded-2xl border border-brown/15 bg-cream p-6">
