@@ -5,6 +5,7 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { flavors, sizes, priceBySize } from "../src/lib/flavors";
 import { galleryItems } from "../src/lib/gallery";
+import { processGalleryImage } from "../src/lib/gallery-upload";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -28,13 +29,13 @@ async function seedGallery() {
   let order = 0;
   for (const item of galleryItems) {
     const ext = path.extname(item.src).toLowerCase();
-    const mimeType = MIME[ext];
-    if (!mimeType) continue;
+    if (!MIME[ext]) continue;
     try {
       const filePath = path.join(process.cwd(), "public", item.src);
-      const data = new Uint8Array(await readFile(filePath));
+      const raw = new Uint8Array(await readFile(filePath));
+      const data = await processGalleryImage(raw); // resize + WebP
       await prisma.galleryImage.create({
-        data: { data, mimeType, alt: item.alt, sortOrder: order++ },
+        data: { data, mimeType: "image/webp", alt: item.alt, sortOrder: order++ },
       });
     } catch (e) {
       console.warn(`Skip gallery image ${item.src}:`, (e as Error).message);

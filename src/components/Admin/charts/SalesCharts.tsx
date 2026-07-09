@@ -4,6 +4,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  PieChart,
+  Pie,
   XAxis,
   YAxis,
   Tooltip,
@@ -13,6 +15,16 @@ import {
 
 const TERRACOTTA = "#b8623d";
 const OLIVE = "#7c8a4e";
+
+// Categorical palette for the pie (validated colorblind-safe).
+export const SIZE_PIE_COLORS = [
+  "#b5471f", // terracotta
+  "#2f7fb0", // blue
+  "#e0a615", // amber
+  "#7b4fa3", // purple
+  "#4a9a3f", // green
+  "#c74a86", // magenta
+];
 
 const rupiahShort = (v: number) => {
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}jt`;
@@ -72,6 +84,41 @@ export function BreakdownChart({
           ))}
         </Bar>
       </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Composition donut (e.g. sales share per size). Color identity is paired with
+// a labelled %-legend outside this component, so it does not rely on color alone.
+export function SizePie({
+  data,
+}: {
+  data: { label: string; amount: number; qty: number }[];
+}) {
+  if (data.length === 0) {
+    return <p className="text-sm text-ink/50">Belum ada data penjualan.</p>;
+  }
+  return (
+    <ResponsiveContainer width="100%" height={240}>
+      <PieChart>
+        <Pie
+          data={data}
+          dataKey="amount"
+          nameKey="label"
+          innerRadius="58%"
+          outerRadius="82%"
+          paddingAngle={2}
+          stroke="none"
+        >
+          {data.map((_, i) => (
+            <Cell key={i} fill={SIZE_PIE_COLORS[i % SIZE_PIE_COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip
+          formatter={(v, name) => [rupiahFull(Number(v)), String(name)]}
+          contentStyle={{ borderRadius: 12, border: "1px solid #e7ddd0" }}
+        />
+      </PieChart>
     </ResponsiveContainer>
   );
 }
