@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-// Hook: true when the signed-in user has the ADMIN role.
-export function useIsAdmin(): boolean {
-  const [isAdmin, setIsAdmin] = useState(false);
+// Hook: true/false when the ADMIN role is known, null while still checking
+// (so callers can avoid rendering transitional UI before the status settles).
+export function useIsAdmin(): boolean | null {
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -21,7 +22,9 @@ export function useIsAdmin(): boolean {
         .then((p) => {
           if (active) setIsAdmin(p?.role === "ADMIN");
         })
-        .catch(() => {});
+        .catch(() => {
+          if (active) setIsAdmin(false);
+        });
     }
 
     supabase.auth.getUser().then(({ data }) => load(!!data.user));
