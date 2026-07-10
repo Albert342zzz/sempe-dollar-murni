@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ import { priceFor, type PriceMap } from "@/lib/prices";
 import { waLink } from "@/lib/contact";
 import { useCart } from "@/context/CartContext";
 import { createClient } from "@/lib/supabase/client";
+import { track } from "@/lib/track";
 
 export default function ProductShowcase({ prices }: { prices: PriceMap }) {
   const router = useRouter();
@@ -50,6 +51,15 @@ export default function ProductShowcase({ prices }: { prices: PriceMap }) {
   }
 
   const waMessage = `Halo Sempe Dollar Murni, saya ingin memesan Sempe rasa ${flavor.name} ukuran ${size} (${formatRupiah(price)}).`;
+
+  // Log each distinct flavor the visitor views (once per mount) for the
+  // "popular products" admin insight.
+  const viewedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (viewedRef.current.has(flavor.id)) return;
+    viewedRef.current.add(flavor.id);
+    track("product_view", { flavorId: flavor.id, flavorName: flavor.name });
+  }, [flavor.id, flavor.name]);
 
   const total = flavors.length;
   const go = (dir: number) => setActive((i) => (i + dir + total) % total);
@@ -169,6 +179,14 @@ export default function ProductShowcase({ prices }: { prices: PriceMap }) {
               href={waLink(waMessage)}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={() =>
+                track("wa_click", {
+                  source: "product",
+                  flavorId: flavor.id,
+                  flavorName: flavor.name,
+                  size,
+                })
+              }
               className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white shadow-lg shadow-terracotta/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-brown"
             >
               <FaWhatsapp className="text-base" />

@@ -11,6 +11,7 @@ import {
   FiShoppingBag,
 } from "react-icons/fi";
 import ProductShowcase from "@/components/Product/ProductShowcase";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
 import { prisma } from "@/lib/prisma";
@@ -245,15 +246,14 @@ export default async function ProductPage() {
               ketersediaan stok, dan pemesanan.
             </p>
 
-            <a
+            <WhatsAppLink
               href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              source="product_cta"
               className="mt-8 inline-flex items-center gap-2 rounded-full bg-terracotta px-8 py-3 text-white shadow-lg shadow-terracotta/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-brown"
             >
               <FaWhatsapp className="text-lg" />
               Pesan via WhatsApp
-            </a>
+            </WhatsAppLink>
           </div>
         </div>
       </section>

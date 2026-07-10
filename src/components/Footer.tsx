@@ -3,6 +3,7 @@ import { FaWhatsapp, FaInstagram, FaFacebookF } from "react-icons/fa";
 import { MdEmail, MdLocationOn, MdAccessTime } from "react-icons/md";
 import { BiStore } from "react-icons/bi";
 import { FiChevronRight } from "react-icons/fi";
+import WhatsAppLink from "@/components/WhatsAppLink";
 import { contact, waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
 
@@ -107,14 +108,13 @@ export default function Footer() {
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cream/5 text-gold">
                 <FaWhatsapp />
               </span>
-              <a
+              <WhatsAppLink
                 href={waLink()}
-                target="_blank"
-                rel="noopener noreferrer"
+                source="footer"
                 className="transition-colors hover:text-gold"
               >
                 {contact.whatsappDisplay}
-              </a>
+              </WhatsAppLink>
             </li>
             <li className="flex items-center gap-3">
               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-cream/5 text-gold">
