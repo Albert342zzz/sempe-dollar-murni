@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { waLink } from "@/lib/contact";
+import { track } from "@/lib/track";
 import {
   validateName,
   validatePhone,
@@ -29,6 +30,7 @@ export default function ContactForm() {
     if (msgError) return setError(msgError);
 
     const message = `Halo Sempe Dollar Murni,\n\nNama: ${nama.trim()}\nNo. Telepon: ${telepon.trim()}\n\n${pesan.trim()}`;
+    track("wa_click", { source: "contact_form" });
     window.open(waLink(message), "_blank", "noopener,noreferrer");
   }
 

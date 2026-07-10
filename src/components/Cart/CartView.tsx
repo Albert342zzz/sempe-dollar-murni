@@ -17,6 +17,7 @@ import { flavors, sizes, getFlavor, formatRupiah } from "@/lib/flavors";
 import { priceFor, type PriceMap } from "@/lib/prices";
 import { waLink } from "@/lib/contact";
 import { sanitizeName, sanitizePhone } from "@/lib/validation";
+import { track } from "@/lib/track";
 import Spinner from "@/components/Spinner";
 
 const selectClass =
@@ -204,6 +205,12 @@ export default function CartView({ prices }: { prices: PriceMap }) {
             href={waLink(waMessage)}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() =>
+              track("wa_click", {
+                source: "cart",
+                items: successOrder.items.length,
+              })
+            }
             className="inline-flex items-center gap-2 rounded-full bg-terracotta px-6 py-3 text-sm text-white transition hover:bg-brown"
           >
             <FaWhatsapp className="text-base" />
