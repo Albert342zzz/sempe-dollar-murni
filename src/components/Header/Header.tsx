@@ -48,8 +48,8 @@ export default function Header() {
   return (
     <>
       <header className="sticky top-0 z-30 h-20 w-full bg-cream text-sm tracking-widest text-ink shadow-md">
-        {/* Nav area — right padding reserves space for the absolute UserMenu box */}
-        <div className="flex h-full items-center justify-between px-4 md:pl-10 md:pr-36 lg:pl-24 lg:pr-48">
+        {/* Nav area */}
+        <div className="flex h-full items-center justify-between px-4 md:pl-10 md:pr-0 lg:pl-24">
           {/* Left nav: Tentang · Produk · Kontak */}
           <nav className="hidden items-center gap-10 md:flex">
             <NavLink href="/about">TENTANG</NavLink>
@@ -71,33 +71,31 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Right nav: Galeri · Cart (cart is hidden for admins) */}
-          <nav className="hidden items-center gap-10 md:flex">
-            <NavLink href="/gallery">GALERI</NavLink>
-            {!isAdmin && (
-              <Link
-                href="/cart"
-                aria-label="Keranjang Saya"
-                className={`relative text-xl transition-colors duration-200 ${
-                  cartActive
-                    ? "text-terracotta"
-                    : "text-ink hover:text-terracotta"
-                }`}
-              >
-                <BiShoppingBag />
-                {totalCount > 0 && (
-                  <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-medium text-white">
-                    {totalCount}
-                  </span>
-                )}
-              </Link>
-            )}
-          </nav>
-        </div>
-
-        {/* UserMenu — corner box anchored to top-right of header */}
-        <div className="absolute right-0 top-0 hidden h-full md:flex">
-          <UserMenu />
+          {/* Right side: Galeri · Cart · account box (consistent spacing) */}
+          <div className="hidden h-full items-center md:flex">
+            <nav className="flex items-center gap-10 pr-6">
+              <NavLink href="/gallery">GALERI</NavLink>
+              {isAdmin === false && (
+                <Link
+                  href="/cart"
+                  aria-label="Keranjang Saya"
+                  className={`relative text-xl transition-colors duration-200 ${
+                    cartActive
+                      ? "text-terracotta"
+                      : "text-ink hover:text-terracotta"
+                  }`}
+                >
+                  <BiShoppingBag />
+                  {totalCount > 0 && (
+                    <span className="absolute -right-2.5 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-terracotta px-1 text-[10px] font-medium text-white">
+                      {totalCount}
+                    </span>
+                  )}
+                </Link>
+              )}
+            </nav>
+            <UserMenu />
+          </div>
         </div>
       </header>
 
