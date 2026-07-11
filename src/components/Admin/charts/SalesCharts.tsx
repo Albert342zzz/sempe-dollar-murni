@@ -6,6 +6,8 @@ import {
   Bar,
   PieChart,
   Pie,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   Tooltip,
@@ -119,6 +121,44 @@ export function SizePie({
           contentStyle={{ borderRadius: 12, border: "1px solid #e7ddd0" }}
         />
       </PieChart>
+    </ResponsiveContainer>
+  );
+}
+
+// Line chart of total sales per month (across reports).
+export function TrendLineChart({
+  data,
+}: {
+  data: { label: string; amount: number }[];
+}) {
+  if (data.length === 0) {
+    return <p className="text-sm text-ink/50">Belum ada data.</p>;
+  }
+  return (
+    <ResponsiveContainer width="100%" height={260}>
+      <LineChart data={data} margin={{ top: 8, right: 12, left: 8, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#e7ddd0" vertical={false} />
+        <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
+        <YAxis
+          tickFormatter={rupiahShort}
+          tick={axis}
+          tickLine={false}
+          axisLine={false}
+          width={48}
+        />
+        <Tooltip
+          formatter={(v) => [rupiahFull(Number(v)), "Penjualan"]}
+          contentStyle={{ borderRadius: 12, border: "1px solid #e7ddd0" }}
+        />
+        <Line
+          type="monotone"
+          dataKey="amount"
+          stroke={TERRACOTTA}
+          strokeWidth={2.5}
+          dot={{ r: 3, fill: TERRACOTTA }}
+          activeDot={{ r: 5 }}
+        />
+      </LineChart>
     </ResponsiveContainer>
   );
 }

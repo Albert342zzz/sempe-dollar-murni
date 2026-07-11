@@ -10,6 +10,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/products": "Produk",
   "/admin/orders": "Pesanan",
   "/admin/reports": "Laporan",
+  "/admin/analytics": "Analitik Penjualan",
   "/admin/insights": "Insight Web",
   "/admin/gallery": "Galeri",
   "/admin/users": "Pengguna",
