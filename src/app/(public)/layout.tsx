@@ -9,8 +9,16 @@ export default function PublicLayout({
 }>) {
   return (
     <div className="flex min-h-full flex-col">
+      <a
+        href="#konten"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:bg-terracotta focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+      >
+        Lewati ke konten
+      </a>
       <Header />
-      <main className="flex-1">{children}</main>
+      <main id="konten" className="flex-1">
+        {children}
+      </main>
       <Footer />
       <ChatWidget />
     </div>
