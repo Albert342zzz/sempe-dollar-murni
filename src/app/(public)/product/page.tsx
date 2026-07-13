@@ -20,7 +20,7 @@ import type { PriceMap } from "@/lib/prices";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Produk - Sempe Dollar Murni",
+  title: "Produk",
   description:
     "Sempe, camilan renyah khas Sempe Dollar Murni dari Temanggung, hadir dalam beragam pilihan rasa. Dibuat dengan resep turun-temurun dan bersertifikasi halal.",
 };

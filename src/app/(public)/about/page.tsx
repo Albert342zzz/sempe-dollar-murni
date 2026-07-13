@@ -8,7 +8,7 @@ import Reveal from "@/components/Reveal";
 import { eloquia } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Tentang Kami - Sempe Dollar Murni",
+  title: "Tentang Kami",
   description:
     "Sempe Dollar Murni, UMKM camilan renyah khas Temanggung sejak 1986. Dibuat dengan resep turun-temurun, bahan pilihan, dan bersertifikasi halal.",
 };

@@ -9,7 +9,7 @@ import type { PriceMap } from "@/lib/prices";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Keranjang Saya - Sempe Dollar Murni",
+  title: "Keranjang Saya",
   description:
     "Atur pesanan Sempe favoritmu — pilih rasa, ukuran, dan jumlah, lalu kirim ke WhatsApp kami.",
 };

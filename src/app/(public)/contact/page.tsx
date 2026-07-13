@@ -12,7 +12,7 @@ import { contact, waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Kontak - Sempe Dollar Murni",
+  title: "Kontak",
   description:
     "Hubungi Sempe Dollar Murni, UMKM kue kering asal Temanggung. Pesan produk, ajukan pertanyaan, atau kunjungi kami.",
 };
