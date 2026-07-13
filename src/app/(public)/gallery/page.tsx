@@ -8,7 +8,7 @@ import { galleryImageUrl, galleryItems as fallbackItems } from "@/lib/gallery";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Galeri - Sempe Dollar Murni",
+  title: "Galeri",
   description:
     "Galeri foto produk dan dokumentasi Sempe Dollar Murni, UMKM kue kering asal Temanggung.",
 };

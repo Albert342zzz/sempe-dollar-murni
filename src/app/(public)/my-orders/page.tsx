@@ -9,7 +9,7 @@ import { eloquia } from "@/lib/fonts";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pesanan Saya - Sempe Dollar Murni",
+  title: "Pesanan Saya",
 };
 
 const statusLabel: Record<string, string> = {

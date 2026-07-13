@@ -5,7 +5,7 @@ import LoginForm from "@/components/Auth/LoginForm";
 import { eloquia } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Masuk - Sempe Dollar Murni",
+  title: "Masuk",
   description: "Masuk ke akun Sempe Dollar Murni Anda.",
 };
 

@@ -5,7 +5,7 @@ import UserManager from "@/components/Admin/UserManager";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Pengguna - Admin Sempe Dollar Murni",
+  title: "Pengguna",
 };
 
 export default async function UsersPage() {
