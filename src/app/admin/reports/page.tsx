@@ -40,8 +40,8 @@ export default async function ReportsPage() {
             Belum ada laporan. Unggah rincian penjualan pertama kamu di atas.
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-brown/15 bg-cream">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto rounded-2xl border border-brown/15 bg-cream">
+            <table className="w-full min-w-[560px] text-left text-sm">
               <thead className="border-b border-brown/10 text-xs uppercase tracking-wide text-ink/50">
                 <tr>
                   <th className="px-4 py-3 font-medium">Periode</th>

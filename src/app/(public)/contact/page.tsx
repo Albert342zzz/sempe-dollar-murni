@@ -10,6 +10,9 @@ import {
 import ContactForm from "@/components/Contact/ContactForm";
 import { contact, waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Kontak",
@@ -39,23 +42,9 @@ const info = [
   { icon: MdAccessTime, label: "Jam Operasional", value: contact.hours },
 ];
 
-// List of retail outlets (placeholder — replace with real data).
-const outlets = [
-  {
-    name: "Toko Oleh-oleh Pak Budi",
-    address: "Jl. Jend. Sudirman No.12, Temanggung, Jawa Tengah",
-  },
-  {
-    name: "Sentra UMKM Kudus",
-    address: "Jl. Sunan Kudus No.45, Kudus, Jawa Tengah",
-  },
-  {
-    name: "Pusat Oleh-oleh Semarang",
-    address: "Jl. Pandanaran No.88, Semarang, Jawa Tengah",
-  },
-];
+export default async function ContactPage() {
+  const outlets = await prisma.outlet.findMany({ orderBy: { id: "asc" } });
 
-export default function ContactPage() {
   return (
     <main>
       {/* Banner */}
@@ -190,8 +179,9 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Where to find our products */}
-      <section className="bg-cream-soft py-16">
+      {/* Where to find our products — hidden when there are no outlets */}
+      {outlets.length > 0 && (
+        <section className="bg-cream-soft py-16">
         <div className="mx-auto max-w-6xl px-6">
           <div className="mb-10 text-center">
             <h2 className="text-2xl font-semibold md:text-3xl">
@@ -206,7 +196,7 @@ export default function ContactPage() {
           <div className="grid gap-6 md:grid-cols-3">
             {outlets.map((o) => (
               <div
-                key={o.name}
+                key={o.id}
                 className="rounded-3xl border border-brown/15 bg-cream p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-brown/5"
               >
                 <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-terracotta/10 text-xl text-terracotta">
@@ -221,7 +211,8 @@ export default function ContactPage() {
             ))}
           </div>
         </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

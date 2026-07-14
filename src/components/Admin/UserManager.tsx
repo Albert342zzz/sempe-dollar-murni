@@ -179,8 +179,8 @@ function UserRow({ user }: { user: UserProfile }) {
 
 function UserTable({ users }: { users: UserProfile[] }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-brown/15 bg-cream">
-      <table className="w-full text-sm">
+    <div className="overflow-x-auto rounded-2xl border border-brown/15 bg-cream">
+      <table className="w-full min-w-[520px] text-sm">
         <thead>
           <tr className="border-b border-brown/10 text-left text-xs font-medium uppercase tracking-wider text-ink/40">
             <th className="px-5 py-3">Email</th>

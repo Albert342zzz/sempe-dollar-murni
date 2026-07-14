@@ -136,6 +136,14 @@ model GalleryImage {
   @@index([sortOrder])
 }
 
+// Stores/outlets that sell the product ("Where to find our products"). Admin-managed.
+model Outlet {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String
+  createdAt DateTime @default(now())
+}
+
 // Lightweight first-party analytics events (e.g. WhatsApp clicks, product
 // views). `type` categorizes the event; `meta` holds flexible per-event data
 // (source, flavor, etc.) so new event kinds can be added without a schema change.
