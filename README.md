@@ -45,6 +45,8 @@ Excel upload ─► SheetJS parse ─► deterministic math (totals, anomalies, 
                               Google Gemini  ─►  natural‑language narrative
 ```
 
+> 📖 **Deep dive:** [**How the AI works**](./docs/AI.md) — a plain‑English, no‑ML‑background walkthrough of each AI feature.
+
 ---
 
 ## 🏗️ Architecture
