@@ -90,8 +90,26 @@ async function main() {
   }
 
   await seedGallery();
+  await seedOutlets();
 
   console.log(`Seed done: ${flavors.length} flavors, ${sizes.length} sizes.`);
+}
+
+// Fill the Outlet table with sample (placeholder) data if it is still empty.
+async function seedOutlets() {
+  const count = await prisma.outlet.count();
+  if (count > 0) {
+    console.log(`Outlets already seeded (${count}), skipped.`);
+    return;
+  }
+  await prisma.outlet.createMany({
+    data: [
+      { name: "Toko Oleh-oleh Pak Budi", address: "Jl. Jend. Sudirman No.12, Temanggung, Jawa Tengah" },
+      { name: "Sentra UMKM Kudus", address: "Jl. Sunan Kudus No.45, Kudus, Jawa Tengah" },
+      { name: "Pusat Oleh-oleh Semarang", address: "Jl. Pandanaran No.88, Semarang, Jawa Tengah" },
+    ],
+  });
+  console.log("Seeded 3 outlets.");
 }
 
 main()

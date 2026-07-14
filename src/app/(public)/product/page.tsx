@@ -11,6 +11,7 @@ import {
   FiShoppingBag,
 } from "react-icons/fi";
 import ProductShowcase from "@/components/Product/ProductShowcase";
+import FlavorRecommender from "@/components/Product/FlavorRecommender";
 import WhatsAppLink from "@/components/WhatsAppLink";
 import { waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
@@ -155,6 +156,10 @@ export default async function ProductPage() {
               Dari original wijen yang gurih hingga manisnya cokelat dan
               brownies. Pilih rasa favoritmu di bawah ini.
             </p>
+          </div>
+
+          <div className="mx-auto mb-10 max-w-3xl">
+            <FlavorRecommender />
           </div>
 
           <ProductShowcase prices={prices} />

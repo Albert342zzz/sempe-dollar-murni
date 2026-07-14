@@ -20,6 +20,7 @@ import {
   reorderGalleryImages,
 } from "@/app/admin/gallery/actions";
 import Spinner from "@/components/Spinner";
+import Modal from "@/components/Modal";
 
 type Img = { id: number; url: string; alt: string };
 
@@ -357,6 +358,7 @@ function Row({
 }
 
 function AddForm({ onDone }: { onDone: () => void }) {
+  const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [alt, setAlt] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -391,6 +393,7 @@ function AddForm({ onDone }: { onDone: () => void }) {
         setFile(null);
         setAlt("");
         if (inputRef.current) inputRef.current.value = "";
+        setOpen(false);
         onDone();
       } else {
         let msg = "Gagal menambah foto.";
@@ -410,77 +413,97 @@ function AddForm({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="rounded-2xl border border-dashed border-brown/30 bg-cream p-6">
-      <div className="flex items-center gap-3">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-terracotta/10 text-terracotta">
-          {busy ? <Spinner className="h-5 w-5" /> : <FiUploadCloud className="text-2xl" />}
-        </div>
-        <div>
-          <p className="text-sm font-medium text-ink">Tambah Foto</p>
-          <p className="text-xs text-ink/50">JPG, PNG, WEBP, atau GIF — maks 3 MB.</p>
-        </div>
-      </div>
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex items-center gap-2 rounded-lg bg-terracotta px-5 py-2.5 text-sm text-white transition hover:bg-brown"
+      >
+        <FiUploadCloud /> Tambah Foto
+      </button>
 
-      <div className="mt-5 flex flex-wrap items-end gap-3">
-        <label
-          className={`inline-flex cursor-pointer items-center gap-2 rounded-lg border border-brown/20 bg-cream-soft px-4 py-2 text-sm text-ink transition hover:bg-cream ${
-            busy ? "pointer-events-none opacity-60" : ""
-          }`}
+      {open && (
+        <Modal
+          title="Tambah Foto"
+          icon={<FiUploadCloud className="text-xl" />}
+          onClose={() => setOpen(false)}
+          dismissable={!busy}
         >
-          <FiImage className="text-base" />
-          {file ? "Ganti file" : "Pilih foto"}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            disabled={busy}
-            onChange={(e) => {
-              setError(null);
-              setFile(e.target.files?.[0] ?? null);
-            }}
-          />
-        </label>
+          <p className="text-sm text-ink/60">
+            JPG, PNG, WEBP, atau GIF — maks 3 MB.
+          </p>
 
-        <input
-          type="text"
-          value={alt}
-          onChange={(e) => setAlt(e.target.value)}
-          placeholder="Deskripsi foto (opsional)"
-          disabled={busy}
-          className="min-w-52 flex-1 rounded-lg border border-brown/20 bg-cream-soft px-3 py-2 text-sm text-ink outline-none transition focus:border-terracotta"
-        />
+          <div className="mt-4 space-y-3">
+            <label
+              className={`flex cursor-pointer items-center gap-2 rounded-lg border border-brown/20 bg-cream-soft px-4 py-2.5 text-sm text-ink transition hover:bg-cream ${
+                busy ? "pointer-events-none opacity-60" : ""
+              }`}
+            >
+              <FiImage className="text-base" />
+              {file ? "Ganti file" : "Pilih foto"}
+              <input
+                ref={inputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={busy}
+                onChange={(e) => {
+                  setError(null);
+                  setFile(e.target.files?.[0] ?? null);
+                }}
+              />
+            </label>
 
-        <button
-          onClick={submit}
-          disabled={!file || busy}
-          className="inline-flex items-center gap-2 rounded-lg bg-terracotta px-5 py-2 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {busy ? "Mengunggah…" : "Tambah"}
-        </button>
-      </div>
-
-      {/* Progress bar */}
-      {busy && (
-        <div className="mt-4">
-          <div className="h-2 w-full overflow-hidden rounded-full bg-cream-soft">
-            <div
-              className="h-full rounded-full bg-terracotta transition-all duration-200"
-              style={{ width: `${processing ? 100 : progress}%` }}
+            <input
+              type="text"
+              value={alt}
+              onChange={(e) => setAlt(e.target.value)}
+              placeholder="Deskripsi foto (opsional)"
+              disabled={busy}
+              className="w-full rounded-lg border border-brown/20 bg-cream-soft px-3 py-2 text-sm text-ink outline-none transition focus:border-terracotta"
             />
           </div>
-          <p className="mt-1.5 text-xs text-ink/50">
-            {processing ? "Memproses…" : `Mengunggah ${progress}%`}
-          </p>
-        </div>
-      )}
 
-      {file && !busy && (
-        <p className="mt-3 truncate text-xs text-ink/50">
-          Terpilih: <span className="text-ink/70">{file.name}</span>
-        </p>
+          {file && !busy && (
+            <p className="mt-2 truncate text-xs text-ink/50">
+              Terpilih: <span className="text-ink/70">{file.name}</span>
+            </p>
+          )}
+
+          {/* Progress bar */}
+          {busy && (
+            <div className="mt-4">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-cream-soft">
+                <div
+                  className="h-full rounded-full bg-terracotta transition-all duration-200"
+                  style={{ width: `${processing ? 100 : progress}%` }}
+                />
+              </div>
+              <p className="mt-1.5 text-xs text-ink/50">
+                {processing ? "Memproses…" : `Mengunggah ${progress}%`}
+              </p>
+            </div>
+          )}
+
+          {error && <p className="mt-3 text-sm text-terracotta">{error}</p>}
+
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              onClick={() => !busy && setOpen(false)}
+              className="rounded-lg border border-brown/20 px-4 py-2 text-sm text-ink/70 transition hover:bg-cream-soft"
+            >
+              Batal
+            </button>
+            <button
+              onClick={submit}
+              disabled={!file || busy}
+              className="inline-flex items-center gap-2 rounded-lg bg-terracotta px-5 py-2 text-sm text-white transition hover:bg-brown disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {busy && <Spinner className="h-4 w-4" />}
+              {busy ? "Mengunggah…" : "Tambah"}
+            </button>
+          </div>
+        </Modal>
       )}
-      {error && <p className="mt-3 text-sm text-terracotta">{error}</p>}
-    </div>
+    </>
   );
 }
