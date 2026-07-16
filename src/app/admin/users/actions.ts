@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { isAdmin } from "@/lib/require-admin";
 import { verifySession, SESSION_COOKIE } from "@/lib/auth";
+import { validateEmail } from "@/lib/validation";
 
 type Role = "USER" | "ADMIN";
 type Result = { ok: boolean; error?: string };
@@ -68,6 +69,57 @@ export async function deleteUserProfile(userId: string): Promise<Result> {
   }
 
   await prisma.userProfile.delete({ where: { userId } });
+
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
+
+// Pre-authorize an email so that person gets the role on their first login —
+// no self-registration needed. If the email already has a profile, we simply
+// change that profile's role instead of creating a dangling invite.
+export async function inviteUser(
+  email: string,
+  role: Role
+): Promise<Result & { promoted?: boolean }> {
+  if (!(await isAdmin())) return { ok: false, error: "Akses ditolak." };
+
+  const emailError = validateEmail(email);
+  if (emailError) return { ok: false, error: emailError };
+
+  const normalized = email.trim().toLowerCase();
+
+  const existing = await prisma.userProfile.findFirst({
+    where: { email: { equals: normalized, mode: "insensitive" } },
+  });
+  if (existing) {
+    if (existing.role === role) {
+      return {
+        ok: false,
+        error: `${normalized} sudah terdaftar sebagai ${role === "ADMIN" ? "admin" : "user"}.`,
+      };
+    }
+    await prisma.userProfile.update({
+      where: { userId: existing.userId },
+      data: { role },
+    });
+    revalidatePath("/admin/users");
+    return { ok: true, promoted: true };
+  }
+
+  if (await prisma.userInvite.findUnique({ where: { email: normalized } })) {
+    return { ok: false, error: `${normalized} sudah diundang sebelumnya.` };
+  }
+
+  await prisma.userInvite.create({ data: { email: normalized, role } });
+
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
+
+export async function deleteInvite(id: number): Promise<Result> {
+  if (!(await isAdmin())) return { ok: false, error: "Akses ditolak." };
+
+  await prisma.userInvite.delete({ where: { id } });
 
   revalidatePath("/admin/users");
   return { ok: true };

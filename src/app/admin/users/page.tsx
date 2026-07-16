@@ -9,9 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default async function UsersPage() {
-  const users = await prisma.userProfile.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const [users, invites] = await Promise.all([
+    prisma.userProfile.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.userInvite.findMany({ orderBy: { createdAt: "desc" } }),
+  ]);
 
   return (
     <div className="p-6 md:p-8">
@@ -21,7 +22,7 @@ export default async function UsersPage() {
       </p>
 
       <div className="mt-6">
-        <UserManager users={users} />
+        <UserManager users={users} invites={invites} />
       </div>
     </div>
   );

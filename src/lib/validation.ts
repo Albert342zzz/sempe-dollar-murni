@@ -40,6 +40,17 @@ export function validatePhone(value: string): string | null {
   return null;
 }
 
+// Email address: a pragmatic check (non-empty, single @, a dotted domain).
+export function validateEmail(value: string): string | null {
+  const v = value.trim();
+  if (!v) return "Email wajib diisi.";
+  if (v.length > 120) return "Email terlalu panjang.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) {
+    return "Format email tidak valid (contoh: nama@gmail.com).";
+  }
+  return null;
+}
+
 // Free-text message: non-empty, at least a few characters.
 export function validateMessage(value: string): string | null {
   const v = value.trim();

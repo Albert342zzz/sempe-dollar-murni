@@ -89,6 +89,16 @@ model UserProfile {
   createdAt DateTime @default(now())
 }
 
+// Pre-authorized email added by an admin, for people who haven't signed up yet.
+// On their first Google login the invite is consumed: the profile is created
+// with this role and the row is deleted.
+model UserInvite {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique // always stored lowercase
+  role      UserRole @default(ADMIN)
+  createdAt DateTime @default(now())
+}
+
 // Sales report for one period (month/year), uploaded as Excel by admin.
 // Figures are calculated deterministically by code (not AI); aiSummary is narrative only.
 model SalesReport {

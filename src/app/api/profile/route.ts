@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/supabase/user";
 import { prisma } from "@/lib/prisma";
 import { validateName, validatePhone } from "@/lib/validation";
+import { createSession, SESSION_COOKIE } from "@/lib/auth";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -34,22 +35,52 @@ export async function POST(req: Request) {
 
   const email = user.email ?? "";
 
-  // New registrations are always USER. Only another admin can promote via /admin/users.
-  const profile = await prisma.userProfile.upsert({
+  const existing = await prisma.userProfile.findUnique({
     where: { userId: user.id },
-    create: {
+  });
+
+  if (existing) {
+    const profile = await prisma.userProfile.update({
+      where: { userId: user.id },
+      data: { email, nickname, phone },
+    });
+    return NextResponse.json(profile, { status: 201 });
+  }
+
+  // First-time profile. Self-registrations are always USER, but an admin may
+  // have pre-authorized this email in /admin/users — that invite decides the
+  // role and is consumed here.
+  const invite = email
+    ? await prisma.userInvite.findUnique({ where: { email: email.toLowerCase() } })
+    : null;
+
+  const profile = await prisma.userProfile.create({
+    data: {
       userId: user.id,
       email,
       nickname,
       phone,
-      role: "USER",
-    },
-    update: {
-      email,
-      nickname,
-      phone,
+      role: invite?.role ?? "USER",
     },
   });
 
-  return NextResponse.json(profile, { status: 201 });
+  if (invite) {
+    await prisma.userInvite.delete({ where: { id: invite.id } });
+  }
+
+  const res = NextResponse.json(profile, { status: 201 });
+
+  // Invited admins get their admin cookie right away, so they don't have to
+  // log out and back in before /admin becomes reachable.
+  if (profile.role === "ADMIN") {
+    res.cookies.set(SESSION_COOKIE, await createSession(email), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60,
+      path: "/",
+    });
+  }
+
+  return res;
 }

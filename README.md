@@ -108,7 +108,7 @@ pnpm dev            # http://localhost:3000
 See [`.env.example`](./.env.example) — `DATABASE_URL` / `DIRECT_URL` (Supabase), `AUTH_SECRET`, `NEXT_PUBLIC_SUPABASE_URL` / `_ANON_KEY`, `GEMINI_API_KEY`, and `NEXT_PUBLIC_SITE_URL`.
 
 ### First admin
-New sign‑ups default to `USER`. Promote your account to `ADMIN` once via Prisma Studio (`pnpm prisma studio`) or SQL; afterwards roles are managed in **Admin → Pengguna**.
+New sign‑ups default to `USER`. Promote your account to `ADMIN` once via Prisma Studio (`pnpm prisma studio`) or SQL; afterwards roles are managed in **Admin → Pengguna**, where you can also **add a user by email before they have ever signed up** — the invite is consumed on their first Google login and the role applied automatically.
 
 ---
 
