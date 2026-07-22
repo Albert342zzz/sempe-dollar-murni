@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    name: Lint · Test · Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Generate the Prisma client so lint and the build have the model types.
+      # No database connection is needed for generate, lint, or the tests
+      # (the unit tests stub out the Prisma import).
+      - name: Generate Prisma client
+        run: pnpm prisma generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      # `next build` is the real type check for this app: it resolves the Next
+      # generated types and native modules that a standalone `tsc --noEmit`
+      # does not. Dummy env values are enough because nothing connects to a
+      # database or external service at build time (dynamic pages render on
+      # request, not during the build).
+      - name: Build
+        run: pnpm build
+        env:
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db
+          DIRECT_URL: postgresql://user:pass@localhost:5432/db
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
+          AUTH_SECRET: dummy-ci-secret-0123456789abcdef0123456789ab
+          NEXT_PUBLIC_SITE_URL: https://sempedollarmurni.com

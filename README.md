@@ -1,5 +1,7 @@
 # Sempe Dollar Murni — AI‑Integrated Company Profile & E‑Commerce
 
+[![CI](https://github.com/Albert342zzz/sempe-dollar-murni/actions/workflows/ci.yml/badge.svg)](https://github.com/Albert342zzz/sempe-dollar-murni/actions/workflows/ci.yml)
+
 A full‑stack web app for **Sempe Dollar Murni**, a real Indonesian UMKM (small business) making traditional crunchy *Sempe* snacks in Temanggung since 1986. It combines a public storefront, a full admin panel, and **three AI features** — built to showcase full‑stack + AI engineering.
 
 > **Live demo:** _add your Vercel URL here_ · **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind v4 · Prisma 7 · Supabase · Google Gemini
@@ -109,6 +111,19 @@ See [`.env.example`](./.env.example) — `DATABASE_URL` / `DIRECT_URL` (Supabase
 
 ### First admin
 New sign‑ups default to `USER`. Promote your account to `ADMIN` once via Prisma Studio (`pnpm prisma studio`) or SQL; afterwards roles are managed in **Admin → Pengguna**, where you can also **add a user by email before they have ever signed up** — the invite is consumed on their first Google login and the role applied automatically.
+
+---
+
+## ✅ Testing & CI
+
+The deterministic core — the Excel **sales parser** and the **cross‑report analytics** (growth, z‑score anomalies, linear‑regression forecast) — is covered by **[Vitest](https://vitest.dev) unit tests**. These are exactly the parts where correctness matters most, and they run **fully offline** (the parser builds an in‑memory workbook; the analytics import to Prisma is stubbed), so no database or API key is needed.
+
+```bash
+pnpm test          # run once
+pnpm test:watch    # watch mode
+```
+
+Every push and PR to `main` runs **lint → unit tests → production build** via [GitHub Actions](./.github/workflows/ci.yml). The build doubles as the type check (it resolves the Next.js generated types and native modules that a standalone `tsc` does not).
 
 ---
 
