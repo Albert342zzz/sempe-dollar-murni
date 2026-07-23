@@ -154,6 +154,19 @@ model Outlet {
   createdAt DateTime @default(now())
 }
 
+// Frequently asked questions shown as an accordion on the Contact page.
+// Admin-managed; the section hides when there are none. `sortOrder` lets the
+// admin control the order (lower first), falling back to id.
+model Faq {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([sortOrder])
+}
+
 // Lightweight first-party analytics events (e.g. WhatsApp clicks, product
 // views). `type` categorizes the event; `meta` holds flexible per-event data
 // (source, flavor, etc.) so new event kinds can be added without a schema change.

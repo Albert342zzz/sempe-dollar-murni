@@ -8,6 +8,7 @@ import {
   MdStorefront,
 } from "react-icons/md";
 import ContactForm from "@/components/Contact/ContactForm";
+import FaqAccordion from "@/components/FaqAccordion";
 import { contact, waLink } from "@/lib/contact";
 import { eloquia } from "@/lib/fonts";
 import { prisma } from "@/lib/prisma";
@@ -43,7 +44,10 @@ const info = [
 ];
 
 export default async function ContactPage() {
-  const outlets = await prisma.outlet.findMany({ orderBy: { id: "asc" } });
+  const [outlets, faqs] = await Promise.all([
+    prisma.outlet.findMany({ orderBy: { id: "asc" } }),
+    prisma.faq.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }),
+  ]);
 
   return (
     <main>
@@ -211,6 +215,31 @@ export default async function ContactPage() {
             ))}
           </div>
         </div>
+        </section>
+      )}
+
+      {/* FAQ — hidden when there are no questions */}
+      {faqs.length > 0 && (
+        <section className="bg-cream py-16">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="mb-10 text-center">
+              <p className="text-sm tracking-widest text-brown">FAQ</p>
+              <h2 className="mt-3 text-2xl font-semibold md:text-3xl">
+                Pertanyaan yang Sering Diajukan
+              </h2>
+              <p className="mx-auto mt-3 max-w-xl text-gray-600">
+                Belum menemukan jawabannya? Hubungi kami langsung lewat WhatsApp.
+              </p>
+            </div>
+
+            <FaqAccordion
+              items={faqs.map((f) => ({
+                id: f.id,
+                question: f.question,
+                answer: f.answer,
+              }))}
+            />
+          </div>
         </section>
       )}
     </main>
