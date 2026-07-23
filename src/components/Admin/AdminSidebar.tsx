@@ -11,6 +11,7 @@ import {
   FiTrendingUp,
   FiImage,
   FiMapPin,
+  FiHelpCircle,
   FiBarChart2,
   FiArrowLeft,
   FiLogOut,
@@ -27,6 +28,7 @@ const nav = [
   { icon: FiBarChart2, label: "Insight Web", href: "/admin/insights" },
   { icon: FiImage, label: "Galeri", href: "/admin/gallery" },
   { icon: FiMapPin, label: "Cabang", href: "/admin/outlets" },
+  { icon: FiHelpCircle, label: "FAQ", href: "/admin/faq" },
   { icon: FiUsers, label: "Pengguna", href: "/admin/users" },
 ];
 
