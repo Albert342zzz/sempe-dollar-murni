@@ -3,6 +3,7 @@ import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import { eloquia } from "@/lib/fonts";
 import { flavors, sizes, getPrice, formatRupiah } from "@/lib/flavors";
+import BestSellerBadge from "@/components/Product/BestSellerBadge";
 
 export default function ProductSection() {
   return (
@@ -67,6 +68,7 @@ export default function ProductSection() {
                     style={{ backgroundColor: f.accent }}
                   />
                   {f.name}
+                  {f.bestSeller && <BestSellerBadge compact className="text-xs" />}
                 </Link>
               ))}
             </div>

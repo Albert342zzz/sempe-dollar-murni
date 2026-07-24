@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { prisma } from "@/lib/prisma";
 import { contact } from "@/lib/contact";
 import { formatRupiah } from "@/lib/flavors";
+import { limitByIp } from "@/lib/rate-limit";
 
 // "Mbak Sempe" AI assistant for customer questions. Uses Google Gemini (free tier) with plain-text streaming.
 
@@ -76,7 +77,27 @@ ATURAN PENTING:
 - Jangan menjanjikan diskon, stok, atau pengiriman yang tidak kamu ketahui — arahkan ke WhatsApp untuk konfirmasi.`;
 }
 
+// Streaming chat is the most expensive call, so keep the window tight.
+const CHAT_LIMIT = 15;
+const CHAT_WINDOW_MS = 5 * 60 * 1000;
+
 export async function POST(req: Request) {
+  const limit = limitByIp(req, "chat", CHAT_LIMIT, CHAT_WINDOW_MS);
+  if (!limit.ok) {
+    return new Response(
+      "Waduh, pertanyaannya banyak banget kak 😄 Istirahat sebentar ya, lalu coba lagi. Kalau buru-buru, langsung WhatsApp kami di " +
+        contact.whatsappDisplay +
+        " ya.",
+      {
+        status: 429,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Retry-After": String(limit.retryAfter),
+        },
+      }
+    );
+  }
+
   let body: { messages?: ChatMessage[] };
   try {
     body = await req.json();

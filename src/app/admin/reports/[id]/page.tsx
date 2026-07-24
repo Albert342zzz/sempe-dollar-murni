@@ -6,6 +6,7 @@ import { formatRupiah } from "@/lib/flavors";
 import { monthLabel } from "@/lib/months";
 import { aggregate } from "@/lib/sales-parser";
 import { BreakdownChart } from "@/components/Admin/charts/SalesCharts";
+import ProductBreakdownTable from "@/components/Admin/ProductBreakdownTable";
 import {
   DeleteReportButton,
   RegenerateInsightButton,
@@ -117,28 +118,7 @@ export default async function ReportDetailPage({
         <h2 className="mb-4 text-lg font-semibold text-ink">
           Rincian per Produk ({a.byProduct.length})
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="border-b border-brown/10 text-xs uppercase tracking-wide text-ink/50">
-              <tr>
-                <th className="px-3 py-2 font-medium">Produk</th>
-                <th className="px-3 py-2 font-medium text-right">Qty</th>
-                <th className="px-3 py-2 font-medium text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {a.byProduct.map((p) => (
-                <tr key={p.label} className="border-b border-brown/5 last:border-0">
-                  <td className="px-3 py-2 text-ink/80">{p.label}</td>
-                  <td className="px-3 py-2 text-right text-ink/70">{p.qty}</td>
-                  <td className="px-3 py-2 text-right font-medium text-ink">
-                    {formatRupiah(p.amount)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ProductBreakdownTable rows={a.byProduct} />
         {report.skippedRows > 0 && (
           <p className="mt-3 text-xs text-ink/40">
             {report.skippedRows} baris total/rekap

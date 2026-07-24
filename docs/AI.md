@@ -122,6 +122,7 @@ So the *statistics are real and deterministic*; the AI just makes them readable.
 - **Only aggregates go to the AI** for reports/analytics — never PII or raw transactions.
 - **Grounded** — the chat and recommender are told to use only the provided menu/data, which greatly reduces made‑up answers.
 - **Guardrails** — message length and history limits, input size caps.
+- **Rate limited** — the public AI routes are capped per IP (chat: 15 requests / 5 min, recommender: 10 / 5 min) so one abusive client cannot burn the shared free-tier quota. Chat replies with a friendly "slow down" message; the recommender quietly falls back to its keyword logic, so the customer still gets an answer. See `src/lib/rate-limit.ts` — it is an in-process counter, a deliberate trade-off documented there.
 - **Always works** — every feature has a non‑AI fallback.
 - **Free‑tier friendly** — small prompts, "thinking" disabled, and narratives are generated **on demand** (once when a report is uploaded, or on a button click) and then stored — never regenerated on every page load.
 
