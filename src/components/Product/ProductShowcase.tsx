@@ -12,6 +12,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { flavors, sizes, formatRupiah } from "@/lib/flavors";
+import BestSellerBadge from "@/components/Product/BestSellerBadge";
 import { priceFor, type PriceMap } from "@/lib/prices";
 import { waLink } from "@/lib/contact";
 import { useCart } from "@/context/CartContext";
@@ -132,9 +133,12 @@ export default function ProductShowcase({ prices }: { prices: PriceMap }) {
             </div>
           </div>
 
-          <h3 className="mt-3 text-3xl font-semibold md:text-4xl">
-            {flavor.name}
-          </h3>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <h3 className="text-3xl font-semibold md:text-4xl">
+              {flavor.name}
+            </h3>
+            {flavor.bestSeller && <BestSellerBadge />}
+          </div>
 
           <p className="mt-4 leading-relaxed text-gray-600">
             {flavor.description}
@@ -250,6 +254,7 @@ export default function ProductShowcase({ prices }: { prices: PriceMap }) {
                   style={{ backgroundColor: f.accent }}
                 />
                 {f.name}
+                {f.bestSeller && <BestSellerBadge compact className="text-xs" />}
               </button>
             );
           })}

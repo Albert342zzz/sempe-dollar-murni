@@ -112,7 +112,13 @@ describe("aggregate", () => {
     expect(size350.amount).toBe(700); // 200 + 500
     expect(size350.qty).toBe(7);
 
-    expect(a.byProduct.map((b) => b.label)).toContain("Keju 350gr");
+    // Flavor and size stay in separate fields (not merged into one label).
+    const keju350 = a.byProduct.find(
+      (p) => p.flavor === "Keju" && p.size === "350gr"
+    )!;
+    expect(keju350).toBeDefined();
+    expect(keju350.qty).toBe(2);
+    expect(keju350.amount).toBe(200);
   });
 
   it("passes through the skipped-row count", () => {

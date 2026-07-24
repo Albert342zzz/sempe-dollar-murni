@@ -1,5 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { flavors } from "@/lib/flavors";
+import { limitByIp } from "@/lib/rate-limit";
 
 // Flavor recommendation based on customer preference (Gemini + template fallback).
 
@@ -38,6 +39,9 @@ function fallbackRecommendation(pref: string): string {
     .join(", ")} atau ${picks[picks.length - 1]} kak — favorit banyak pelanggan! 🙂`;
 }
 
+const RECOMMEND_LIMIT = 10;
+const RECOMMEND_WINDOW_MS = 5 * 60 * 1000;
+
 export async function POST(req: Request) {
   let pref = "";
   try {
@@ -50,6 +54,12 @@ export async function POST(req: Request) {
 
   const useAi = process.env.USE_AI_INSIGHT !== "false";
   if (!useAi) return Response.json({ text: fallbackRecommendation(pref) });
+
+  // Over the rate limit: serve the keyword fallback instead of erroring. The
+  // customer still gets a useful answer and no Gemini quota is spent.
+  if (!limitByIp(req, "recommend", RECOMMEND_LIMIT, RECOMMEND_WINDOW_MS).ok) {
+    return Response.json({ text: fallbackRecommendation(pref) });
+  }
 
   try {
     const prompt = `Kamu "Mbak Sempe", asisten Sempe Dollar Murni. Pelanggan mencari rekomendasi rasa Sempe. Preferensi mereka: "${pref}".

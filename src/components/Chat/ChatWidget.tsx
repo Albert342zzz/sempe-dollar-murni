@@ -70,6 +70,17 @@ export default function ChatWidget() {
         body: JSON.stringify({ messages: nextMessages }),
       });
 
+      // Rate limited: the server sends a friendly plain-text explanation.
+      if (res.status === 429) {
+        const notice = await res.text();
+        setMessages((prev) => {
+          const copy = [...prev];
+          copy[copy.length - 1] = { role: "assistant", content: notice };
+          return copy;
+        });
+        return;
+      }
+
       if (!res.ok || !res.body) {
         throw new Error("Gagal terhubung");
       }

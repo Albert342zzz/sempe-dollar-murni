@@ -4,6 +4,7 @@ export type Flavor = {
   description: string;
   accent: string; // theme color (hex) for each flavor
   image: string;
+  bestSeller?: boolean; // highlighted with a "Best Seller" badge in the UI
 };
 
 // Available packaging sizes.
@@ -60,6 +61,7 @@ export const flavors: Flavor[] = [
       "Rasa original khas Sempe dengan taburan wijen yang gurih dan renyah.",
     accent: "#C9A227",
     image: DEFAULT_IMAGE,
+    bestSeller: true,
   },
   {
     id: "pisang",

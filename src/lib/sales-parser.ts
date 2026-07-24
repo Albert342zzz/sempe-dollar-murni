@@ -33,12 +33,27 @@ export type Breakdown = {
   amount: number;
 };
 
+// Per-product totals. Flavor and size are kept as separate fields (they are
+// separate columns in SalesRecord too) so the UI can show them in their own
+// columns instead of one merged "Keju 350gr" string.
+export type ProductBreakdown = {
+  flavor: string;
+  size: string;
+  qty: number;
+  amount: number;
+};
+
+// Display label when the two need to be shown as one string (e.g. AI prompts).
+export function productLabel(p: { flavor: string; size: string }): string {
+  return p.flavor ? `${p.flavor} ${p.size}` : p.size;
+}
+
 export type SalesAggregates = {
   totalAmount: number;
   totalQty: number;
   validRows: number;
   skippedRows: number;
-  byProduct: Breakdown[]; // "Keju 350gr"
+  byProduct: ProductBreakdown[]; // flavor + size kept separate
   byFlavor: Breakdown[]; // "Keju"
   bySize: Breakdown[]; // "350gr"
 };
@@ -191,7 +206,22 @@ function addTo(map: Map<string, Breakdown>, label: string, qty: number, amount: 
   map.set(label, b);
 }
 
-const sortByAmount = (a: Breakdown, b: Breakdown) => b.amount - a.amount;
+function addToProduct(
+  map: Map<string, ProductBreakdown>,
+  flavor: string,
+  size: string,
+  qty: number,
+  amount: number
+) {
+  const key = `${flavor} ${size}`;
+  const b = map.get(key) ?? { flavor, size, qty: 0, amount: 0 };
+  b.qty += qty;
+  b.amount += amount;
+  map.set(key, b);
+}
+
+const sortByAmount = (a: { amount: number }, b: { amount: number }) =>
+  b.amount - a.amount;
 
 // Exported separately so it can be reused (e.g. regenerate insight from stored records).
 export function aggregate(
@@ -201,7 +231,7 @@ export function aggregate(
   let totalAmount = 0;
   let totalQty = 0;
 
-  const productMap = new Map<string, Breakdown>();
+  const productMap = new Map<string, ProductBreakdown>();
   const flavorMap = new Map<string, Breakdown>();
   const sizeMap = new Map<string, Breakdown>();
 
@@ -209,8 +239,7 @@ export function aggregate(
     totalAmount += rec.amount;
     totalQty += rec.qty;
 
-    const product = rec.flavor ? `${rec.flavor} ${rec.size}` : rec.size;
-    addTo(productMap, product, rec.qty, rec.amount);
+    addToProduct(productMap, rec.flavor, rec.size, rec.qty, rec.amount);
     if (rec.flavor) addTo(flavorMap, rec.flavor, rec.qty, rec.amount);
     addTo(sizeMap, rec.size, rec.qty, rec.amount);
   }

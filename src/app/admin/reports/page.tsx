@@ -4,6 +4,7 @@ import { formatRupiah } from "@/lib/flavors";
 import { monthLabel } from "@/lib/months";
 import ReportUploader from "@/components/Admin/ReportUploader";
 import { DeleteReportButton } from "@/components/Admin/ReportControls";
+import ReportRow from "@/components/Admin/ReportRow";
 
 export const dynamic = "force-dynamic";
 
@@ -53,10 +54,7 @@ export default async function ReportsPage() {
               </thead>
               <tbody>
                 {reports.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="border-b border-brown/5 transition last:border-0 hover:bg-cream-soft"
-                  >
+                  <ReportRow key={r.id} href={`/admin/reports/${r.id}`}>
                     <td className="px-4 py-3">
                       <Link
                         href={`/admin/reports/${r.id}`}
@@ -81,7 +79,7 @@ export default async function ReportsPage() {
                         filename={monthLabel(r.periodMonth, r.periodYear)}
                       />
                     </td>
-                  </tr>
+                  </ReportRow>
                 ))}
               </tbody>
             </table>

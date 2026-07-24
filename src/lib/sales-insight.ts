@@ -1,6 +1,6 @@
 import { GoogleGenAI } from "@google/genai";
 import { formatRupiah } from "@/lib/flavors";
-import type { SalesAggregates } from "@/lib/sales-parser";
+import { productLabel, type SalesAggregates } from "@/lib/sales-parser";
 
 // =============================================================================
 // SALES REPORT INSIGHT NARRATIVE
@@ -48,7 +48,7 @@ Penjualan per ukuran:
 ${list(a.bySize)}
 
 Produk terlaris:
-${list(a.byProduct)}`;
+${list(a.byProduct.map((p) => ({ label: productLabel(p), qty: p.qty, amount: p.amount })))}`;
 }
 
 // Template narrative (no AI) — always available as a fallback.
@@ -61,7 +61,9 @@ export function templateInsight(a: SalesAggregates, periodLabel: string): string
   ];
   if (a.byProduct[0]) {
     const p = a.byProduct[0];
-    parts.push(`Produk terlaris: ${p.label} (${p.qty} pcs, ${formatRupiah(p.amount)}).`);
+    parts.push(
+      `Produk terlaris: ${productLabel(p)} (${p.qty} pcs, ${formatRupiah(p.amount)}).`
+    );
   }
   if (a.byFlavor[0]) parts.push(`Rasa favorit: ${a.byFlavor[0].label}.`);
   if (a.bySize[0]) parts.push(`Ukuran paling laku: ${a.bySize[0].label}.`);
