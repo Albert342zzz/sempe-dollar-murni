@@ -1,10 +1,12 @@
 # Sempe Dollar Murni — AI‑Integrated Company Profile & E‑Commerce
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Visit_Site-b8623d?style=for-the-badge&logo=vercel&logoColor=white)](https://sempe-dollar-murni.vercel.app/)
 [![CI](https://github.com/Albert342zzz/sempe-dollar-murni/actions/workflows/ci.yml/badge.svg)](https://github.com/Albert342zzz/sempe-dollar-murni/actions/workflows/ci.yml)
 
 A full‑stack web app for **Sempe Dollar Murni**, a real Indonesian UMKM (small business) making traditional crunchy *Sempe* snacks in Temanggung since 1986. It combines a public storefront, a full admin panel, and **three AI features** — built to showcase full‑stack + AI engineering.
 
-> **Live demo:** _add your Vercel URL here_ · **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind v4 · Prisma 7 · Supabase · Google Gemini
+> **🔗 Live demo:** **<https://sempe-dollar-murni.vercel.app/>**
+> **Stack:** Next.js 16 · React 19 · TypeScript · Tailwind v4 · Prisma 7 · Supabase · Google Gemini
 
 <!-- Add a screenshot or the generated OG image here, e.g.: ![Preview](./docs/preview.png) -->
 
