@@ -203,24 +203,28 @@ export function computeAnalytics(reports: InputReport[]): Analytics {
   return { months, momGrowthPct, bestMonth, anomalies: topAnomalies, forecast, monthCount };
 }
 
-// Load all sales reports and compute analytics. Shared by the analytics page
-// and the AI-narrative server action so the query/mapping lives in one place.
-export async function getSalesAnalytics(): Promise<Analytics> {
+// Load all sales reports mapped to the InputReport shape. Shared by the
+// analytics and production-plan loaders so the query/mapping lives in one place.
+export async function loadInputReports(): Promise<InputReport[]> {
   const reports = await prisma.salesReport.findMany({
     include: { records: true },
   });
-  return computeAnalytics(
-    reports.map((r) => ({
-      periodYear: r.periodYear,
-      periodMonth: r.periodMonth,
-      totalAmount: r.totalAmount,
-      totalQty: r.totalQty,
-      records: r.records.map((rec) => ({
-        flavor: rec.flavor,
-        size: rec.size,
-        qty: rec.qty,
-        amount: rec.amount,
-      })),
-    }))
-  );
+  return reports.map((r) => ({
+    periodYear: r.periodYear,
+    periodMonth: r.periodMonth,
+    totalAmount: r.totalAmount,
+    totalQty: r.totalQty,
+    records: r.records.map((rec) => ({
+      flavor: rec.flavor,
+      size: rec.size,
+      qty: rec.qty,
+      amount: rec.amount,
+    })),
+  }));
+}
+
+// Load all sales reports and compute analytics. Used by the analytics page and
+// the AI-narrative server action.
+export async function getSalesAnalytics(): Promise<Analytics> {
+  return computeAnalytics(await loadInputReports());
 }
